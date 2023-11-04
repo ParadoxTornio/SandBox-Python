@@ -75,8 +75,8 @@ class Game:
 
     def add_element(self):
         mouse_pos = pygame.mouse.get_pos()
-        x_cord = round(mouse_pos[0] // 8) * 8
-        y_cord = round(mouse_pos[1] // 8) * 8
+        x_cord = mouse_pos[0] // 8 * 8
+        y_cord = mouse_pos[1] // 8 * 8
         copy_element = copy.copy(self.selected_element)
         copy_element.image = self.selected_element.image.copy()
         copy_element.rect = self.selected_element.rect.copy()

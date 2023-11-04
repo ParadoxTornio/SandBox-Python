@@ -269,7 +269,7 @@ class LavaElement(Element):
             if not self.time_on_screen:
                 self.time_on_screen = time.perf_counter()
             elif time.perf_counter() - self.time_on_screen >= 3:
-                self.groups()[0].add(SolidElement('камень', 'images/stone_frame.png', [self.rect.x, self.rect.y]  # noqa
+                self.groups()[0].add(SolidElement('камень', 'stone_frame.png', [self.rect.x, self.rect.y]  # noqa
                                                   , 15, 5, 1000, False))  # noqa
                 self.kill()
 
