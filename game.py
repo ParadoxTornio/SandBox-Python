@@ -12,10 +12,10 @@ class Game:
         pygame.mixer.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
-        self.background = pygame.image.load('background_2.png')
+        self.background = pygame.image.load('images/background_2.png')
         self.table_rect = pygame.rect.Rect(0, 82, 1280, 424)
         self.screen.blit(self.background, (0, 0))
-        self.clear_picture = pygame.image.load('musorka.png')
+        self.clear_picture = pygame.image.load('images/musorka.png')
         self.clear_image = pygame.Surface((50, 50))
         self.clear_rect = self.clear_image.get_rect()
         self.clear_rect.x = 25
