@@ -19,7 +19,7 @@ class Button(pygame.sprite.Sprite):
         self.rect.y = position[1]
         self.is_visible = False
         self.image.blit(self.picture, (0, 0))
-        sys_font = pygame.font.Font('images/PixeloidMono-d94EV.ttf', 11)
+        sys_font = pygame.font.Font('PixeloidMono-d94EV.ttf', 11)
         text_surface = sys_font.render(self.text, True, (194, 23, 29))
         text_rect = text_surface.get_rect()
         text_rect.x = 0
