@@ -41,31 +41,57 @@ def main():
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 pygame.image.save(screen, "balls_and_lines.png")
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                p = event.pos[X], flipy(event.pos[Y])
-                body = pymunk.Body(10, 100)
-                body.position = p
-                shape = pymunk.Circle(body, 2, (0, 0))
-                shape.friction = 0.5
-                shape.collision_type = COLLTYPE_BALL
-                space.add(body, shape)
-                balls.append(shape)
+                for i in range(10):
+                    p = event.pos[X], flipy(event.pos[Y])
+                    body = pymunk.Body(10, 100)
+                    body.position = p
+                    shape = pymunk.Circle(body, 2, (0, 0))
+                    shape.friction = 0.5
+                    shape.collision_type = COLLTYPE_BALL
+                    space.add(body, shape)
+                    balls.append(shape)
 
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                if line_point1 is None:
-                    line_point1 = Vec2d(event.pos[X], flipy(event.pos[Y]))
-            elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
-                if line_point1 is not None:
+            # elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            #     if line_point1 is None:
+            #         line_point1 = Vec2d(event.pos[X], flipy(event.pos[Y]))
+            # elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
+            #     if line_point1 is not None:
 
-                    line_point2 = Vec2d(event.pos[X], flipy(event.pos[Y]))
-                    shape = pymunk.Segment(
-                        space.static_body, line_point1, line_point2, 0.0
-                    )
-                    shape.friction = 0.99
-                    space.add(shape)
-                    static_lines.append(shape)
-                    line_point1 = None
+            #         line_point2 = Vec2d(event.pos[X], flipy(event.pos[Y]))
+            #         shape = pymunk.Segment(
+            #             space.static_body, line_point1, line_point2, 0.0
+            #         )
+            #         shape.friction = 0.99
+            #         space.add(shape)
+            #         static_lines.append(shape)
+            #         line_point1 = None
+            line_point1 = Vec2d(0, flipy(599))
+            line_point2 = Vec2d(600, flipy(599))
+            left_line_point1_y = Vec2d(500, flipy(0))
+            left_line_point2_y = Vec2d(500, flipy(600))
+            right_line_point1_y = Vec2d(599, flipy(0))
+            right_line_point2_y = Vec2d(599, flipy(600))
+            shape1 = pymunk.Segment(
+                space.static_body, line_point1, line_point2, 0.0
+            )
+            shape2 = pymunk.Segment(
+                space.static_body, left_line_point1_y, left_line_point2_y, 0.0
+            )
+            shape3 = pymunk.Segment(
+                space.static_body, right_line_point1_y, right_line_point2_y,
+                0.0)
+            shape1.friction = 0.99
+            shape2.friction = 0.99
+            shape3.friction = 0.99
+            space.add(shape1)
+            space.add(shape2)
+            space.add(shape3)
+            static_lines.append(shape1)
+            static_lines.append(shape2)
+            static_lines.append(shape3)
+            line_point1 = None
 
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 run_physics = not run_physics
 
         p = pygame.mouse.get_pos()
@@ -87,14 +113,6 @@ def main():
 
         screen.fill(pygame.Color("white"))
 
-        font = pygame.font.Font(None, 16)
-        text = """ """
-        y = 5
-        for line in text.splitlines():
-            text = font.render(line, True, pygame.Color("black"))
-            screen.blit(text, (5, y))
-            y += 10
-
         for ball in balls:
             r = ball.radius
             v = ball.body.position
@@ -102,8 +120,7 @@ def main():
             p = int(v.x), int(flipy(v.y))
             p2 = p + Vec2d(rot.x, -rot.y) * r * 0.9
             p2 = int(p2.x), int(p2.y)
-            pygame.draw.circle(screen, pygame.Color("blue"), p, int(r), 2)
-            pygame.draw.line(screen, pygame.Color("red"), p, p2)
+            pygame.draw.circle(screen, pygame.Color("blue"), p, int(r), 8)
             water_surface = pygame.Surface((8, 8))
             water_surface.blit(image, (0, 0))
             screen.blit(water_surface, (p[0] - r, p[1] - r))
@@ -121,11 +138,12 @@ def main():
             p1 = int(pv1.x), int(flipy(pv1.y))
             p2 = int(pv2.x), int(flipy(pv2.y))
             pygame.draw.lines(screen, pygame.Color(
-                "lightgray"), False, [p1, p2])
+                "black"), False, [p1, p2])
 
         pygame.display.flip()
-        clock.tick(50)
-        pygame.display.set_caption("fps: " + str(clock.get_fps()))
+        clock.tick(60)
+        pygame.display.set_caption("fps: " + str(clock.get_fps()) +
+                                   " quantity: " + str(len(balls)))
 
 
 if __name__ == "__main__":
