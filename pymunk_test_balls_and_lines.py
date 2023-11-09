@@ -31,7 +31,7 @@ def main():
     static_lines = []
     run_physics = True
 
-    image = pygame.image.load('images/water_frame.png')
+    image = pygame.image.load('images/water_frame_2.png')
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -45,26 +45,12 @@ def main():
                     p = event.pos[X], flipy(event.pos[Y])
                     body = pymunk.Body(10, 100)
                     body.position = p
-                    shape = pymunk.Circle(body, 2, (0, 0))
+                    shape = pymunk.Circle(body, 5, (0, 0))
                     shape.friction = 0.5
                     shape.collision_type = COLLTYPE_BALL
                     space.add(body, shape)
                     balls.append(shape)
 
-            # elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-            #     if line_point1 is None:
-            #         line_point1 = Vec2d(event.pos[X], flipy(event.pos[Y]))
-            # elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
-            #     if line_point1 is not None:
-
-            #         line_point2 = Vec2d(event.pos[X], flipy(event.pos[Y]))
-            #         shape = pymunk.Segment(
-            #             space.static_body, line_point1, line_point2, 0.0
-            #         )
-            #         shape.friction = 0.99
-            #         space.add(shape)
-            #         static_lines.append(shape)
-            #         line_point1 = None
             line_point1 = Vec2d(0, flipy(599))
             line_point2 = Vec2d(600, flipy(599))
             left_line_point1_y = Vec2d(500, flipy(0))
@@ -97,15 +83,6 @@ def main():
         p = pygame.mouse.get_pos()
         mouse_pos = Vec2d(p[X], flipy(p[Y]))
 
-        # if pygame.key.get_mods() and \
-        #         pygame.mouse.get_pressed()[0]:
-        #     body = pymunk.Body(10, 10)
-        #     body.position = mouse_pos
-        #     shape = pymunk.Circle(body, 4, (0, 0))
-        #     shape.collision_type = COLLTYPE_BALL
-        #     space.add(body, shape)
-        #     balls.append(shape)
-
         if run_physics:
             dt = 1.0 / 60.0
             for x in range(1):
@@ -120,8 +97,8 @@ def main():
             p = int(v.x), int(flipy(v.y))
             p2 = p + Vec2d(rot.x, -rot.y) * r * 0.9
             p2 = int(p2.x), int(p2.y)
-            pygame.draw.circle(screen, pygame.Color("blue"), p, int(r), 8)
-            water_surface = pygame.Surface((8, 8))
+            pygame.draw.circle(screen, pygame.Color("blue"), p, int(r), 2)
+            water_surface = pygame.Surface((16, 16))
             water_surface.blit(image, (0, 0))
             screen.blit(water_surface, (p[0] - r, p[1] - r))
 
