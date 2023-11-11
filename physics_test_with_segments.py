@@ -11,10 +11,12 @@ BLOCK_SIZE = 8
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
+options = pymunk.pygame_util.DrawOptions(screen)
 
 pymunk.pygame_util.positive_y_is_up = False
 space = pymunk.Space()
 space.gravity = 0.0, 900.0
+draw_options = False
 
 walls = []
 metal = []
@@ -87,6 +89,18 @@ while True:
         metal_surface.blit(metal_image, (0, 0))
         screen.blit(metal_surface, (x, y))
 
+    key = pygame.key.get_pressed()
+
+    if key[pygame.K_d]:
+        draw_options = True
+
+    elif key[pygame.K_s]:
+        draw_options = False
+
+    if draw_options:
+        space.debug_draw(options)
+        pygame.display.flip()
+
     pygame.display.flip()
     clock.tick(FPS)
 
@@ -95,7 +109,6 @@ while True:
 # который может быть использован для отрисовки объектов
 # физического пространства Pymunk в окне Pygame.
 # Вот пример использования  drawOptions :
-
 
 
 # python
@@ -132,7 +145,6 @@ while True:
 #     space.step(1 / 60)
 
 # pygame.quit()
-
 
 
 # В этом примере мы создаем окно размером 800x600 пикселей и физическое
