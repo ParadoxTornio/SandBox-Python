@@ -47,8 +47,12 @@ def create_metal(space, mouse_pos):
     x_cord = mouse_pos[0] // 8 * 8
     y_cord = mouse_pos[1] // 8 * 8
     metal_block = pymunk.Segment(
-        space.static_body, (x_cord, y_cord + BLOCK_SIZE),
-        (x_cord + BLOCK_SIZE, y_cord + BLOCK_SIZE), BLOCK_SIZE)
+        space.static_body,
+        (x_cord + BLOCK_SIZE // 2, y_cord + BLOCK_SIZE // 2 - 1),
+        (x_cord + BLOCK_SIZE // 2, y_cord + BLOCK_SIZE // 2 + 1),
+        BLOCK_SIZE // 2 - 1)
+    metal_block.x_cord = x_cord
+    metal_block.y_cord = y_cord
     space.add(metal_block)
     return metal_block
 
@@ -66,11 +70,16 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                water.append(create_water(space, event.pos))
-            elif event.button == 3:
-                metal.append(create_metal(space, event.pos))
+        # elif event.type == pygame.MOUSEBUTTONDOWN:
+        #     if event.button == 1:
+        #         water.append(create_water(space, event.pos))
+        #     elif event.button == 3:
+        #         metal.append(create_metal(space, event.pos))
+    if pygame.mouse.get_pressed()[2]:
+        metal.append(create_metal(space, pygame.mouse.get_pos()))
+    if pygame.mouse.get_pressed()[0]:
+        for i in range(10):
+            water.append(create_water(space, pygame.mouse.get_pos()))
 
     space.step(DT)
     screen.fill(pygame.Color("white"))
@@ -84,7 +93,7 @@ while True:
 
     for metal_shape in metal:
         radius = metal_shape.radius
-        x, y = metal_shape.a[0], metal_shape.a[1] - BLOCK_SIZE
+        x, y = metal_shape.x_cord, metal_shape.y_cord
         metal_surface = pygame.Surface((8, 8))
         metal_surface.blit(metal_image, (0, 0))
         screen.blit(metal_surface, (x, y))
@@ -102,58 +111,5 @@ while True:
         pygame.display.flip()
 
     pygame.display.flip()
+    pygame.display.set_caption(f'{clock.get_fps()} quantity:{len(water)}')
     clock.tick(FPS)
-
-
-# Модуль  pymunk.pygame_util  предоставляет класс  drawOptions ,
-# который может быть использован для отрисовки объектов
-# физического пространства Pymunk в окне Pygame.
-# Вот пример использования  drawOptions :
-
-
-# python
-# import pygame
-# import pymunk
-# from pymunk.pygame_util import draw_options
-
-# pygame.init()
-
-# screen = pygame.display.set_mode((800, 600))
-
-# space = pymunk.Space()
-# space.gravity = (0, -900)
-
-# body = pymunk.Body(1, 100)
-# body.position = (400, 300)
-# shape = pymunk.Circle(body, 30)
-# space.add(body, shape)
-
-# options = draw_options.DrawOptions(screen)
-
-# running = True
-# while running:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             running = False
-
-#     screen.fill((255, 255, 255))
-
-#     space.debug_draw(options)
-
-#     pygame.display.flip()
-
-#     space.step(1 / 60)
-
-# pygame.quit()
-
-
-# В этом примере мы создаем окно размером 800x600 пикселей и физическое
-# пространство  space . Затем мы создаем объект  drawOptions  и передаем в
-# него наше окно  screen . В основном цикле программы мы очищаем экран,
-# вызываем метод  debug_draw()  объекта  space , который отрисовывает
-# объекты физического пространства с использованием  drawOptions ,
-# и обновляем экран.
-#  drawOptions  предоставляет различные параметры и методы для настройки
-# отображения объектов физического пространства, такие как цвета,
-# масштабирование и т. д. Вы можете ознакомиться с документацией Pymunk,
-# чтобы узнать больше о возможностях  drawOptions .

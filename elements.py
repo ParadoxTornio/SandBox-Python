@@ -1,6 +1,7 @@
 from config import WIDTH
 # , HEIGHT, FPS, BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
 import pygame
+from pymunk import Body, Circle
 import random
 import time
 
@@ -104,25 +105,27 @@ class FireElement(Element):
 
 class LiquidElement(Element):
     def __init__(self, name, image_path, pos, ph,
-                 liquidity, evaporation_temperature):
+                 liquidity, evaporation_temperature, space):
         super().__init__(name, image_path, pos)
-        self.ph = ph
-        self.liquidity = liquidity
-        self.evaporation_temperature = evaporation_temperature
-        self.gravity = True
-        self.direction = None
-        self.previous_x_position = self.pos[0]
+        # self.ph = ph
+        # self.liquidity = liquidity
+        # self.evaporation_temperature = evaporation_temperature
+        # self.gravity = True
+        # self.direction = None
+        # self.previous_x_position = self.pos[0]
+        water_body = Body(10, 100)
+        water_body.position = pos
+        self.water_shape = Circle(water_body, 5, (0, 0))
+        space.add(water_body, self.water_shape)
 
     def update(self):
-        if self.gravity:
-            if self.rect.y <= 503:
-                self.rect.y += self.liquidity // 5
-        self.gravity = True
+        self.rect.x = self.water_shape.body.position[0] - 8
+        self.rect.y = self.water_shape.body.position[1] - 8
 
-    def change_position(self, pos):
-        self.rect.x = pos[0]
-        self.rect.y = pos[1]
-        self.previous_x_position = pos[0]
+    # def change_position(self, pos):
+    #     self.rect.x = pos[0]
+    #     self.rect.y = pos[1]
+    #     self.previous_x_position = pos[0]
 
     def __copy__(self):
         new_instance = self.__class__(self.name, self.image_path, self.pos,
