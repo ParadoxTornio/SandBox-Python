@@ -1,8 +1,9 @@
 import pygame
 import copy
-from config import WIDTH, HEIGHT, FPS
+from config import WIDTH, HEIGHT, FPS, GRAVITY
 # , BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
 from menu import Menu, ELEMENT_SELECTED
+from pymunk import Space, pygame_util, Segment
 from utils import custom_collision
 
 
@@ -10,6 +11,10 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
+
+        pygame_util.positive_y_is_up = False
+        self.space = Space()
+        self.space.gravity = GRAVITY
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.background = pygame.image.load('images/background_2.png')
@@ -20,11 +25,25 @@ class Game:
         self.clear_rect = self.clear_image.get_rect()
         self.clear_rect.x = 25
         self.clear_rect.y = 25
-        self.menu = Menu(self.screen)
+        self.menu = Menu(self.screen, self.space)
         pygame.display.flip()
         self.running = True
         self.selected_element = None
         self.elements_group = pygame.sprite.Group()
+
+        segment_floor = Segment(
+            self.space.static_body, (1, HEIGHT - 136), (WIDTH, HEIGHT - 136),
+            11)
+
+        segment_left_wall = Segment(
+            self.space.static_body, (1, 0), (1, HEIGHT), 10)
+
+        segment_right_wall = Segment(
+            self.space.static_body, (WIDTH - 11, 0), (WIDTH - 11, HEIGHT), 10)
+
+        self.space.add(segment_floor)
+        self.space.add(segment_left_wall)
+        self.space.add(segment_right_wall)
 
     def new(self):
         self.run()
@@ -37,7 +56,9 @@ class Game:
             self.draw()
 
     def update(self):
-        pygame.display.set_caption(str(self.clock.get_fps()))
+        pygame.display.set_caption(
+            f'{self.clock.get_fps()} amount: {len(self.elements_group)}')
+        self.space.step(1 / FPS)
         self.elements_group.update()
 
     def events(self):
@@ -68,7 +89,8 @@ class Game:
 
     def draw(self):
         self.screen.blit(self.background, (0, 0))
-        self.elements_group.draw(self.screen)
+        # self.elements_group.draw(self.screen)
+        
         self.menu.draw()
         self.screen.blit(self.clear_picture, (25, 25))
         pygame.display.flip()

@@ -2,6 +2,7 @@ TITLE = "SandBox"
 WIDTH = 1280
 HEIGHT = 660
 FPS = 60
+GRAVITY = (0, 900)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)

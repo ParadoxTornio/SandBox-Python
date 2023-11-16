@@ -25,6 +25,11 @@ water = []
 metal_image = pygame.image.load('images/metal_frame.png')
 water_image = pygame.image.load('images/water_frame_2.png')
 
+water_surface = pygame.Surface((16, 16))
+water_surface.blit(water_image, (0, 0))
+metal_surface = pygame.Surface((8, 8))
+metal_surface.blit(metal_image, (0, 0))
+
 segment_floor = pymunk.Segment(
     space.static_body, (1, HEIGHT), (WIDTH, HEIGHT), 10)
 
@@ -84,18 +89,16 @@ while True:
     space.step(DT)
     screen.fill(pygame.Color("white"))
 
+    
+
     for water_shape in water:
         radius = water_shape.radius
         x, y = water_shape.body.position[0], water_shape.body.position[1]
-        water_surface = pygame.Surface((16, 16))
-        water_surface.blit(water_image, (0, 0))
         screen.blit(water_surface, (x - 8, y - 8))
 
     for metal_shape in metal:
         radius = metal_shape.radius
         x, y = metal_shape.x_cord, metal_shape.y_cord
-        metal_surface = pygame.Surface((8, 8))
-        metal_surface.blit(metal_image, (0, 0))
         screen.blit(metal_surface, (x, y))
 
     key = pygame.key.get_pressed()

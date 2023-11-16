@@ -56,8 +56,9 @@ class MenuButton(Button):
 
 
 class Menu:
-    def __init__(self, screen):
+    def __init__(self, screen, space):
         self.screen = screen
+        self.space = space
         self.elements_button = MenuButton(
             'images/button_0.png', (WIDTH - 75, 25), '', self)
         self.background_image = pygame.image.load('images/background.png')
@@ -73,10 +74,13 @@ class Menu:
         self.menu_buttons_group.clear(self.screen, self.background_image)
 
     def create_buttons(self):
+        water_image = pygame.image.load('images/water_frame_2.png')
+        water_surface = pygame.Surface((16, 16))
+        water_surface.blit(water_image, (0, 0))
         water_button = Button(
             'images/water.png', (100, 525), 'вода',
-            LiquidElement('вода', 'images/water_frame.png',
-                          [0, 0], 0, 10, 100))
+            LiquidElement('вода', water_surface,
+                          [0, 0], 0, 10, 100, self.space))
         fire_button = Button(
             'images/fire.png', (175, 525), 'огонь',
             FireElement('огонь', 'images/fire_frame.png', [0, 0], 1000))
@@ -98,10 +102,10 @@ class Menu:
         lava_button = Button(
             'images/lava.png', (700, 525), 'лава',
             LavaElement('лава', 'images/lava_frame.png', [0, 0], 1200))
-        poison_button = Button(
-            'images/poison.png', (775, 525), 'кислота',
-            LiquidElement('кислота', 'images/poison_frame.png',
-                          [0, 0], 30, 15, 350))
+        # poison_button = Button(
+        #     'images/poison.png', (775, 525), 'кислота',
+        #     LiquidElement('кислота', 'images/poison_frame.png',
+        #                   [0, 0], 30, 15, 350, self.space))
         bricks_button = Button(
             'images/bricks.png', (550, 525), 'кирпичи',
             SolidElement('кирпичи', 'images/bricks_frame.png',
@@ -110,9 +114,10 @@ class Menu:
             'images/concrete.png', (400, 525), 'бетон',
             SolidElement('бетон', 'images/concrete_frame.png',
                          [0, 0], 25, 7, 1000, False))
-        sand_button = Button(
-            'images/sand.png', (625, 525), 'песок',
-            LiquidElement('песок', 'images/sand_frame.png', [0, 0], 0, 10, 0))
+        # sand_button = Button(
+        #     'images/sand.png', (625, 525), 'песок',
+        #     LiquidElement('песок', 'images/sand_frame.png', [0, 0], 0, 10, 0,
+        #                   self.space))
         oak_button = Button(
             'images/oak.png', (1075, 525), 'дуб',
             WoodElement('дуб', 'images/oak_frame.png', [0, 0], 5, 900))
@@ -130,9 +135,9 @@ class Menu:
         self.menu_buttons_group.add(concrete_button)  # noqa
         self.menu_buttons_group.add(glass_button)  # noqa
         self.menu_buttons_group.add(bricks_button)  # noqa
-        self.menu_buttons_group.add(sand_button)  # noqa
+        # self.menu_buttons_group.add(sand_button)  # noqa
         self.menu_buttons_group.add(lava_button)  # noqa
-        self.menu_buttons_group.add(poison_button)  # noqa
+        # self.menu_buttons_group.add(poison_button)  # noqa
         self.menu_buttons_group.add(stone_button)  # noqa
         self.menu_buttons_group.add(c4_button)  # noqa
         self.menu_buttons_group.add(gunpowder_button)  # noqa
