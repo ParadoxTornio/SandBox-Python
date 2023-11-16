@@ -89,8 +89,6 @@ while True:
     space.step(DT)
     screen.fill(pygame.Color("white"))
 
-    
-
     for water_shape in water:
         radius = water_shape.radius
         x, y = water_shape.body.position[0], water_shape.body.position[1]
