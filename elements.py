@@ -1,6 +1,7 @@
-# from config import WIDTH, HEIGHT, FPS, BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
+from config import BLOCK_SIZE
+# WIDTH, HEIGHT, FPS, BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
 import pygame
-from pymunk import Body, Circle
+from pymunk import Body, Circle, Segment
 # import random
 import time
 
@@ -50,19 +51,29 @@ class SteamElement(Element):
 
 
 class SolidElement(Element):
-    def __init__(self, name, image_path, pos,
-                 solidity, fragility, temperature_resistance, is_melting):
+    def __init__(self, name, image_path, pos, solidity,
+                 fragility, temperature_resistance, is_melting, space):
         super().__init__(name, image_path, pos)
+        self.space = space
         self.solidity = solidity
         self.fragility = fragility
         self.temperature_resistance = temperature_resistance
         self.is_melting = is_melting
 
+    def change_position(self, pos):
+        super().change_position(pos)
+        self.metal_block = Segment(
+            self.space.static_body,
+            (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 - 1),
+            (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 + 1),
+            BLOCK_SIZE // 2 - 1)
+        self.space.add(self.metal_block)
+
     def __copy__(self):
         new_instance = self.__class__(
             self.name, self.image_path, self.pos,
             self.solidity, self.fragility,
-            self.temperature_resistance, self.is_melting)
+            self.temperature_resistance, self.is_melting, self.space)
         return new_instance
 
     def interaction(self, sprite_2):
@@ -100,23 +111,19 @@ class FireElement(Element):
 
 
 class LiquidElement(Element):
-    def __init__(self, name, image, pos, ph,
+    def __init__(self, name, image_path, pos, ph,
                  liquidity, evaporation_temperature, space):
-        # super().__init__(name, image, pos)
-        pygame.sprite.Sprite.__init__(self)
-        self.image = image
+        super().__init__(name, image_path, pos)
+        # self.image_path = image_path
         # self.picture = pygame.image.load(self.image_path)
-        self.pos = pos
+        # self.pos = pos
+        self.image = pygame.Surface((16, 16))
+        self.image.blit(self.picture, (0, 0))
         self.rect = self.image.get_rect()
         self.rect.x = self.pos[0]
         self.rect.y = self.pos[1]
-        self.name = name
+        # self.name = name
 
-        # self.picture = image
-        # self.image = pygame.Surface((8, 8))
-        # self.image.blit(self.picture, (0, 0))
-
-        
         self.ph = ph
         self.liquidity = liquidity
         self.evaporation_temperature = evaporation_temperature
@@ -138,7 +145,7 @@ class LiquidElement(Element):
         self.water_shape.body.position = pos[0] + 8, pos[1] + 8
 
     def __copy__(self):
-        new_instance = self.__class__(self.name, self.image, self.pos,
+        new_instance = self.__class__(self.name, self.image_path, self.pos,
                                       self.ph, self.liquidity,
                                       self.evaporation_temperature, self.space)
         return new_instance
@@ -284,7 +291,7 @@ class LavaElement(Element):
                 self.time_on_screen = time.perf_counter()
             elif time.perf_counter() - self.time_on_screen >= 3:
                 self.groups()[0].add(SolidElement('камень', 'images/stone_frame.png', [self.rect.x, self.rect.y]  # noqa
-                                                  , 15, 5, 1000, False))  # noqa
+                                                  , 15, 5, 1000, False, self.space))  # noqa
                 self.kill()
 
     def __copy__(self):
@@ -294,7 +301,6 @@ class LavaElement(Element):
 
     def interaction(self, sprite_2):
         if isinstance(sprite_2, LiquidElement):
-            sprite_2.kill()
             try:
                 if self.rect.y > sprite_2.rect.y:
                     cords = [self.rect.x, self.rect.y]
@@ -302,9 +308,10 @@ class LavaElement(Element):
                     cords = [sprite_2.rect.x, sprite_2.rect.y]
                 self.groups()[0].add(SteamElement('пар', 'images/пар.png', cords))  # noqa
                 self.groups()[0].add(SolidElement('камень', 'images/stone_frame.png', cords  # noqa
-                                                  , 15, 5, 1000, False))  # noqa
+                                                  , 15, 5, 1000, False, self.space))  # noqa
             except IndexError:
                 pass
+            sprite_2.kill()
             self.kill()
         if isinstance(sprite_2, SolidElement):
             if self.temperature >= sprite_2.temperature_resistance:

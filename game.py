@@ -31,19 +31,19 @@ class Game:
         self.selected_element = None
         self.elements_group = pygame.sprite.Group()
 
-        segment_floor = Segment(
+        self.segment_floor = Segment(
             self.space.static_body, (1, HEIGHT - 136), (WIDTH, HEIGHT - 136),
             11)
 
-        segment_left_wall = Segment(
+        self.segment_left_wall = Segment(
             self.space.static_body, (1, 0), (1, HEIGHT), 10)
 
-        segment_right_wall = Segment(
+        self.segment_right_wall = Segment(
             self.space.static_body, (WIDTH - 11, 0), (WIDTH - 11, HEIGHT), 10)
 
-        self.space.add(segment_floor)
-        self.space.add(segment_left_wall)
-        self.space.add(segment_right_wall)
+        self.space.add(self.segment_floor)
+        self.space.add(self.segment_left_wall)
+        self.space.add(self.segment_right_wall)
 
     def new(self):
         self.run()
@@ -85,12 +85,20 @@ class Game:
                 if event.button == 1 and \
                         self.clear_rect.collidepoint(mouse_pos):
                     self.elements_group.empty()
+                    for i in self.space.bodies:
+                        self.space.remove(i)
+                    for i in self.space.shapes:
+                        self.space.remove(i)
+                    self.space.add(self.segment_floor)
+                    self.space.add(self.segment_left_wall)
+                    self.space.add(self.segment_right_wall)
+
             self.menu.handle_events(event)
 
     def draw(self):
         self.screen.blit(self.background, (0, 0))
-        # self.elements_group.draw(self.screen)
-        
+        self.elements_group.draw(self.screen)
+
         self.menu.draw()
         self.screen.blit(self.clear_picture, (25, 25))
         pygame.display.flip()

@@ -74,12 +74,9 @@ class Menu:
         self.menu_buttons_group.clear(self.screen, self.background_image)
 
     def create_buttons(self):
-        water_image = pygame.image.load('images/water_frame_2.png')
-        water_surface = pygame.Surface((16, 16))
-        water_surface.blit(water_image, (0, 0))
         water_button = Button(
             'images/water.png', (100, 525), 'вода',
-            LiquidElement('вода', water_surface,
+            LiquidElement('вода', 'images/water_frame_2.png',
                           [0, 0], 0, 10, 100, self.space))
         fire_button = Button(
             'images/fire.png', (175, 525), 'огонь',
@@ -87,7 +84,7 @@ class Menu:
         metal_button = Button(
             'images/metal.png', (250, 525), 'металл',
             SolidElement('металл', 'images/metal_frame.png',
-                         [0, 0], 10, 5, 500, True))
+                         [0, 0], 10, 5, 500, True, self.space))
         c4_button = Button(
             'images/C4.png', (925, 525), 'С-4',
             ExplodingElement('C-4', 'images/C4_frame.png', [0, 0], 15, False))
@@ -98,26 +95,26 @@ class Menu:
         buf_metal_button = Button(
             'images/buffed_metal.png', (325, 525), 'металл+',
             SolidElement('металл+', 'images/metal_plus_frame.png',
-                         [0, 0], 50, 5, 1250, True))
+                         [0, 0], 50, 5, 1250, True, self.space))
         lava_button = Button(
             'images/lava.png', (700, 525), 'лава',
             LavaElement('лава', 'images/lava_frame.png', [0, 0], 1200))
-        # poison_button = Button(
-        #     'images/poison.png', (775, 525), 'кислота',
-        #     LiquidElement('кислота', 'images/poison_frame.png',
-        #                   [0, 0], 30, 15, 350, self.space))
+        poison_button = Button(
+            'images/poison.png', (775, 525), 'кислота',
+            LiquidElement('кислота', 'images/poison_frame.png',
+                          [0, 0], 30, 15, 350, self.space))
         bricks_button = Button(
             'images/bricks.png', (550, 525), 'кирпичи',
             SolidElement('кирпичи', 'images/bricks_frame.png',
-                         [0, 0], 10, 10, 1000, False))
+                         [0, 0], 10, 10, 1000, False, self.space))
         concrete_button = Button(
             'images/concrete.png', (400, 525), 'бетон',
             SolidElement('бетон', 'images/concrete_frame.png',
-                         [0, 0], 25, 7, 1000, False))
-        # sand_button = Button(
-        #     'images/sand.png', (625, 525), 'песок',
-        #     LiquidElement('песок', 'images/sand_frame.png', [0, 0], 0, 10, 0,
-        #                   self.space))
+                         [0, 0], 25, 7, 1000, False, self.space))
+        sand_button = Button(
+            'images/sand.png', (625, 525), 'песок',
+            LiquidElement('песок', 'images/sand_frame.png', [0, 0], 0, 10, 0,
+                          self.space))
         oak_button = Button(
             'images/oak.png', (1075, 525), 'дуб',
             WoodElement('дуб', 'images/oak_frame.png', [0, 0], 5, 900))
@@ -127,7 +124,7 @@ class Menu:
         stone_button = Button(
             'images/stone.png', (850, 525), 'камень',
             SolidElement('камень', 'images/stone_frame.png',
-                         [0, 0], 15, 5, 1000, False))
+                         [0, 0], 15, 5, 1000, False, self.space))
         self.menu_buttons_group.add(water_button)  # noqa
         self.menu_buttons_group.add(fire_button)  # noqa
         self.menu_buttons_group.add(metal_button)  # noqa
@@ -135,9 +132,9 @@ class Menu:
         self.menu_buttons_group.add(concrete_button)  # noqa
         self.menu_buttons_group.add(glass_button)  # noqa
         self.menu_buttons_group.add(bricks_button)  # noqa
-        # self.menu_buttons_group.add(sand_button)  # noqa
+        self.menu_buttons_group.add(sand_button)  # noqa
         self.menu_buttons_group.add(lava_button)  # noqa
-        # self.menu_buttons_group.add(poison_button)  # noqa
+        self.menu_buttons_group.add(poison_button)  # noqa
         self.menu_buttons_group.add(stone_button)  # noqa
         self.menu_buttons_group.add(c4_button)  # noqa
         self.menu_buttons_group.add(gunpowder_button)  # noqa
