@@ -76,6 +76,10 @@ class SolidElement(Element):
             self.temperature_resistance, self.is_melting, self.space)
         return new_instance
 
+    def kill(self):
+        self.space.remove(self.metal_block)
+        super().kill()
+
     def interaction(self, sprite_2):
         super().interaction(sprite_2)
         if not isinstance(sprite_2, SolidElement):
@@ -149,6 +153,10 @@ class LiquidElement(Element):
                                       self.ph, self.liquidity,
                                       self.evaporation_temperature, self.space)
         return new_instance
+
+    def kill(self):
+        self.space.remove(self.water_shape)
+        super().kill()
 
     def interaction(self, sprite_2):
         pass
