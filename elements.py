@@ -118,25 +118,23 @@ class LiquidElement(Element):
     def __init__(self, name, image_path, pos, ph,
                  liquidity, evaporation_temperature, space):
         super().__init__(name, image_path, pos)
-        # self.image_path = image_path
-        # self.picture = pygame.image.load(self.image_path)
-        # self.pos = pos
         self.image = pygame.Surface((16, 16))
         self.image.blit(self.picture, (0, 0))
         self.rect = self.image.get_rect()
         self.rect.x = self.pos[0]
         self.rect.y = self.pos[1]
-        # self.name = name
 
         self.ph = ph
         self.liquidity = liquidity
         self.evaporation_temperature = evaporation_temperature
         self.space = space
-        # self.image = pygame.Surface((16, 16))
-        # self.image.blit(self.picture, (0, 0))
         water_body = Body(10, 100)
         water_body.position = pos
         self.water_shape = Circle(water_body, 5, (0, 0))
+        self.water_shape.friction = 0
+        if name == 'песок':
+            self.water_shape.friction = 10
+            self.water_shape.body.moment = 10000
         space.add(water_body, self.water_shape)
 
     def update(self):
@@ -155,6 +153,7 @@ class LiquidElement(Element):
         return new_instance
 
     def kill(self):
+        # self.space.remove(self.water_shape.body)
         self.space.remove(self.water_shape)
         super().kill()
 
@@ -228,15 +227,29 @@ class ExplodingElement(Element):
 
 class WoodElement(Element):
     def __init__(self, name, image_path, pos,
-                 solidity, temperature_resistance):
+                 solidity, temperature_resistance, space):
         super().__init__(name, image_path, pos)
         self.solidity = solidity
+        self.space = space
         self.temperature_resistance = temperature_resistance
+
+    def change_position(self, pos):
+        super().change_position(pos)
+        self.wood_block = Segment(
+            self.space.static_body,
+            (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 - 1),
+            (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 + 1),
+            BLOCK_SIZE // 2 - 1)
+        self.space.add(self.wood_block)
+
+    def kill(self):
+        self.space.remove(self.wood_block)
+        super().kill()
 
     def __copy__(self):
         new_instance = self.__class__(self.name, self.image_path,
                                       self.pos, self.solidity,
-                                      self.temperature_resistance)
+                                      self.temperature_resistance, self.space)
         return new_instance
 
     def interaction(self, sprite_2):
@@ -247,30 +260,37 @@ class WoodElement(Element):
         elif isinstance(sprite_2, LiquidElement):
             if self.solidity < sprite_2.ph:
                 self.kill()
-            else:
-                sprite_2.gravity = False
 
 
 class GlassElement(Element):
     def __init__(self, name, image_path, pos,
-                 solidity, temperature_resistance):
+                 solidity, temperature_resistance, space):
         super().__init__(name, image_path, pos)
         self.solidity = solidity
+        self.space = space
         self.temperature_resistance = temperature_resistance
+
+    def change_position(self, pos):
+        super().change_position(pos)
+        self.glass_block = Segment(
+            self.space.static_body,
+            (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 - 1),
+            (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 + 1),
+            BLOCK_SIZE // 2 - 1)
+        self.space.add(self.glass_block)
+
+    def kill(self):
+        self.space.remove(self.glass_block)
+        super().kill()
 
     def __copy__(self):
         new_instance = self.__class__(self.name, self.image_path,
                                       self.pos, self.solidity,
-                                      self.temperature_resistance)
+                                      self.temperature_resistance, self.space)
         return new_instance
 
     def interaction(self, sprite_2):
         super().interaction(sprite_2)
-        if not isinstance(sprite_2, GlassElement):
-            if isinstance(sprite_2, LiquidElement):
-                sprite_2.gravity = False
-                sprite_2.rect.y = self.rect.y - self.rect.height
-                sprite_2.rect.x = sprite_2.previous_x_position
         if isinstance(sprite_2, FireElement):
             if sprite_2.temperature >= self.temperature_resistance:
                 self.kill()

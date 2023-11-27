@@ -20,16 +20,26 @@ class Game:
         self.background = pygame.image.load('images/background_2.png')
         self.table_rect = pygame.rect.Rect(0, 82, 1280, 424)
         self.screen.blit(self.background, (0, 0))
+
         self.clear_picture = pygame.image.load('images/musorka.png')
         self.clear_image = pygame.Surface((50, 50))
         self.clear_rect = self.clear_image.get_rect()
         self.clear_rect.x = 25
         self.clear_rect.y = 25
+
+        self.eraser_picture = pygame.image.load('images/button.png')
+        self.eraser_image = pygame.Surface((50, 50))
+        self.eraser_rect = self.eraser_image.get_rect()
+        self.eraser_rect.x = 100
+        self.eraser_rect.y = 25
+
         self.menu = Menu(self.screen, self.space)
         pygame.display.flip()
         self.running = True
         self.selected_element = None
         self.elements_group = pygame.sprite.Group()
+        self.options = pygame_util.DrawOptions(self.screen)
+        self.draw_options = False
 
         self.segment_floor = Segment(
             self.space.static_body, (1, HEIGHT - 136), (WIDTH, HEIGHT - 136),
@@ -40,6 +50,8 @@ class Game:
 
         self.segment_right_wall = Segment(
             self.space.static_body, (WIDTH - 11, 0), (WIDTH - 11, HEIGHT), 10)
+
+        self.segment_floor.friction = 1
 
         self.space.add(self.segment_floor)
         self.space.add(self.segment_left_wall)
@@ -61,6 +73,11 @@ class Game:
         self.space.step(1 / FPS)
         self.elements_group.update()
 
+    def erase_element(self, mouse_pos):
+        for sprite in self.elements_group.sprites():
+            if sprite.rect.collidepoint(mouse_pos):
+                sprite.kill()
+
     def events(self):
         for sprite_1 in self.elements_group:
             collision = pygame.sprite.spritecollide(
@@ -78,7 +95,10 @@ class Game:
                     self.selected_element and \
                     self.table_rect.collidepoint(mouse_pos):
                 if mouse_event[0]:
-                    self.add_element()
+                    if self.selected_element != 'eraser':
+                        self.add_element()
+                    else:
+                        self.erase_element(mouse_pos)
                 elif mouse_event[2]:
                     self.selected_element = None
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -92,8 +112,22 @@ class Game:
                     self.space.add(self.segment_floor)
                     self.space.add(self.segment_left_wall)
                     self.space.add(self.segment_right_wall)
+                if event.button == 1 and \
+                        self.eraser_rect.collidepoint(mouse_pos):
+                    self.selected_element = 'eraser'
 
             self.menu.handle_events(event)
+        key = pygame.key.get_pressed()
+
+        if key[pygame.K_d]:
+            self.draw_options = True
+
+        elif key[pygame.K_s]:
+            self.draw_options = False
+
+        if self.draw_options:
+            self.space.debug_draw(self.options)
+            pygame.display.flip()
 
     def draw(self):
         self.screen.blit(self.background, (0, 0))
@@ -101,6 +135,7 @@ class Game:
 
         self.menu.draw()
         self.screen.blit(self.clear_picture, (25, 25))
+        self.screen.blit(self.eraser_picture, (100, 25))
         pygame.display.flip()
 
     def add_element(self):

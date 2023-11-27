@@ -83,7 +83,7 @@ while True:
     if pygame.mouse.get_pressed()[2]:
         metal.append(create_metal(space, pygame.mouse.get_pos()))
     if pygame.mouse.get_pressed()[0]:
-        for i in range(10):
+        for i in range(100):
             water.append(create_water(space, pygame.mouse.get_pos()))
 
     space.step(DT)

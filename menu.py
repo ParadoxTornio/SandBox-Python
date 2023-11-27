@@ -42,6 +42,7 @@ class MenuButton(Button):
     def __init__(self, image_path, position, text, menu_object):
         super().__init__(image_path, position, text)
         self.menu_object = menu_object
+        self.image = pygame.Surface((50, 50))
         self.esc_picture = pygame.image.load('images/esc_button.png')
         self.is_open = False
 
@@ -117,10 +118,12 @@ class Menu:
                           self.space))
         oak_button = Button(
             'images/oak.png', (1075, 525), 'дуб',
-            WoodElement('дуб', 'images/oak_frame.png', [0, 0], 5, 900))
+            WoodElement('дуб', 'images/oak_frame.png',
+                        [0, 0], 5, 900, self.space))
         glass_button = Button(
             'images/glass.png', (475, 525), 'стекло',
-            GlassElement('стекло', 'images/glass_frame.png', [0, 0], 5, 550))
+            GlassElement('стекло', 'images/glass_frame.png',
+                         [0, 0], 5, 550, self.space))
         stone_button = Button(
             'images/stone.png', (850, 525), 'камень',
             SolidElement('камень', 'images/stone_frame.png',
