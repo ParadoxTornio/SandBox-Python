@@ -113,8 +113,18 @@ class FireElement(Element):
         elif time.perf_counter() - self.time_on_screen >= 1:
             pygame.sprite.Sprite.kill(self)
 
+    def interaction(self, sprite_2):
+        if isinstance(sprite_2, LiquidElement):
+            if self.temperature >= sprite_2.evaporation_temperature:
+                try:
+                    sprite_2.groups()[0].add(SteamElement('пар', 'images/пар.png', [self.rect.x, self.rect.y]))  # noqa
+                except IndexError:
+                    pass
+                sprite_2.kill()
+                self.kill()
 
-class LiquidElement(Element):
+
+class LiquidElement(Element):  # TODO испарение воды от огня
     def __init__(self, name, image_path, pos, ph,
                  liquidity, evaporation_temperature, space):
         super().__init__(name, image_path, pos)
@@ -183,21 +193,15 @@ class LiquidElement(Element):
 
 
 class ExplodingElement(Element):
-    def __init__(self, name, image_path, pos, explosion_power, gravity):
+    def __init__(self, name, image_path, pos, explosion_power):
         super().__init__(name, image_path, pos)
         self.explosion_power = explosion_power
-        self.gravity = gravity
 
     def __copy__(self):
         new_instance = self.__class__(
             self.name, self.image_path, self.pos,
-            self.explosion_power, self.gravity)
+            self.explosion_power)
         return new_instance
-
-    def update(self):
-        if self.gravity:
-            if self.rect.y <= 504:
-                self.rect.y += 1
 
     def explode(self):
         center = self.rect.center
@@ -297,11 +301,9 @@ class GlassElement(Element):
         if isinstance(sprite_2, LiquidElement):
             if sprite_2.ph >= self.solidity * 10:
                 self.kill()
-            else:
-                sprite_2.gravity = False
 
 
-class LavaElement(Element):
+class LavaElement(Element):  # TODO сделать физику как у воды
     def __init__(self, name, image_path, pos, temperature):
         super().__init__(name, image_path, pos)
         self.temperature = temperature

@@ -8,11 +8,14 @@ ELEMENT_SELECTED = pygame.USEREVENT + 1
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, image_path, position, text, element_object=None):
+    def __init__(self, image_path, position, text,
+                 element_object=None):
         pygame.sprite.Sprite.__init__(self)
         self.position = position
         self.text = text
         self.picture = pygame.image.load(image_path)
+        self.selected_picture = pygame.image.load(
+            'images/selected button.png').convert_alpha()
         self.image = pygame.Surface((50, 65))
         self.rect = self.image.get_rect()
         self.rect.x = position[0]
@@ -31,7 +34,13 @@ class Button(pygame.sprite.Sprite):
         mouse_pos = pygame.mouse.get_pos()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1 and self.rect.collidepoint(mouse_pos):
+                self.image.blit(self.selected_picture, (0, 0))
                 self.click_action()
+                return True
+        return False
+
+    def unselect_button(self):
+        self.image.blit(self.picture, (0, 0))
 
     def click_action(self):
         pygame.event.post(
@@ -65,6 +74,7 @@ class Menu:
         self.background_image = pygame.image.load('images/background.png')
         self.menu_buttons_group = pygame.sprite.Group()
         self.menu_buttons_group.add(self.elements_button)  # noqa
+        self.selected_button = None
         self.draw()
         self.create_buttons()
 
@@ -73,6 +83,11 @@ class Menu:
 
     def hide_menu(self):
         self.menu_buttons_group.clear(self.screen, self.background_image)
+
+    def unselect_button(self):
+        if self.selected_button:
+            self.selected_button.unselect_button()
+            self.selected_button = None
 
     def create_buttons(self):
         water_button = Button(
@@ -87,12 +102,8 @@ class Menu:
             SolidElement('металл', 'images/metal_frame.png',
                          [0, 0], 10, 5, 500, True, self.space))
         c4_button = Button(
-            'images/C4.png', (925, 525), 'С-4',
-            ExplodingElement('C-4', 'images/C4_frame.png', [0, 0], 15, False))
-        gunpowder_button = Button(
-            'images/gunpowder.png', (1000, 525), 'порох',
-            ExplodingElement('порох', 'images/gunpowder_frame.png',
-                             [0, 0], 15, True))
+            'images/C4.png', (925, 525), 'C-4',
+            ExplodingElement('C-4', 'images/C4_frame.png', [0, 0], 15))
         buf_metal_button = Button(
             'images/buffed_metal.png', (325, 525), 'металл+',
             SolidElement('металл+', 'images/metal_plus_frame.png',
@@ -117,7 +128,7 @@ class Menu:
             LiquidElement('песок', 'images/sand_frame.png', [0, 0], 0, 10, 0,
                           self.space))
         oak_button = Button(
-            'images/oak.png', (1075, 525), 'дуб',
+            'images/oak.png', (1000, 525), 'дуб',
             WoodElement('дуб', 'images/oak_frame.png',
                         [0, 0], 5, 900, self.space))
         glass_button = Button(
@@ -140,7 +151,6 @@ class Menu:
         self.menu_buttons_group.add(poison_button)  # noqa
         self.menu_buttons_group.add(stone_button)  # noqa
         self.menu_buttons_group.add(c4_button)  # noqa
-        self.menu_buttons_group.add(gunpowder_button)  # noqa
         self.menu_buttons_group.add(oak_button)  # noqa
 
     def draw(self):
@@ -149,4 +159,8 @@ class Menu:
 
     def handle_events(self, event):
         for button in self.menu_buttons_group:
-            button.update(event)
+            # button.update(event)
+            if button.update(event) and self.selected_button != button:
+                if self.selected_button:
+                    self.selected_button.unselect_button()
+                self.selected_button = button

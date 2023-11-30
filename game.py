@@ -27,11 +27,17 @@ class Game:
         self.clear_rect.x = 25
         self.clear_rect.y = 25
 
-        self.eraser_picture = pygame.image.load('images/button.png')
+        self.eraser_picture = pygame.image.load('images/eraser_button.png')
         self.eraser_image = pygame.Surface((50, 50))
         self.eraser_rect = self.eraser_image.get_rect()
         self.eraser_rect.x = 100
         self.eraser_rect.y = 25
+
+        self.selected_button_picture = pygame.image.load(
+            'images/selected button.png').convert_alpha()
+
+        self.unselected_button_picture = pygame.image.load(
+            'images/unselected button.png').convert_alpha()
 
         self.menu = Menu(self.screen, self.space)
         pygame.display.flip()
@@ -73,7 +79,7 @@ class Game:
         self.space.step(1 / FPS)
         self.elements_group.update()
 
-    def erase_element(self, mouse_pos):
+    def erase_element(self, mouse_pos):  # TODO сделать выбор размера стирки
         for sprite in self.elements_group.sprites():
             if sprite.rect.collidepoint(mouse_pos):
                 sprite.kill()
@@ -101,6 +107,7 @@ class Game:
                         self.erase_element(mouse_pos)
                 elif mouse_event[2]:
                     self.selected_element = None
+                    self.menu.unselect_button()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 and \
                         self.clear_rect.collidepoint(mouse_pos):
@@ -115,6 +122,7 @@ class Game:
                 if event.button == 1 and \
                         self.eraser_rect.collidepoint(mouse_pos):
                     self.selected_element = 'eraser'
+                    self.menu.unselect_button()
 
             self.menu.handle_events(event)
         key = pygame.key.get_pressed()
@@ -136,6 +144,12 @@ class Game:
         self.menu.draw()
         self.screen.blit(self.clear_picture, (25, 25))
         self.screen.blit(self.eraser_picture, (100, 25))
+
+        if self.selected_element == 'eraser':
+            self.screen.blit(self.selected_button_picture, (100, 25))
+        else:
+            self.screen.blit(self.unselected_button_picture, (100, 25))
+
         pygame.display.flip()
 
     def add_element(self):
