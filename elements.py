@@ -50,7 +50,7 @@ class SteamElement(Element):
             pygame.sprite.Sprite.kill(self)
 
 
-class SolidElement(Element):
+class SolidElement(Element):  # TODO иногда происходит такая ошибка при взаимодействии с кислотой AssertionError: shape not in space, already removed?
     def __init__(self, name, image_path, pos, solidity,
                  fragility, temperature_resistance, is_melting, space):
         super().__init__(name, image_path, pos)
@@ -124,7 +124,7 @@ class FireElement(Element):
                 self.kill()
 
 
-class LiquidElement(Element):  # TODO испарение воды от огня
+class LiquidElement(Element):  # TODO испарение воды от огня и песок испаряется от огня
     def __init__(self, name, image_path, pos, ph,
                  liquidity, evaporation_temperature, space):
         super().__init__(name, image_path, pos)
@@ -192,7 +192,7 @@ class LiquidElement(Element):  # TODO испарение воды от огня
     #                 self.rect.x = sprite_2.rect.x - sprite_2.rect.width
 
 
-class ExplodingElement(Element):
+class ExplodingElement(Element):  # TODO  вода уничтожает C-4 и C-4 не взрывается
     def __init__(self, name, image_path, pos, explosion_power):
         super().__init__(name, image_path, pos)
         self.explosion_power = explosion_power
@@ -303,7 +303,7 @@ class GlassElement(Element):
                 self.kill()
 
 
-class LavaElement(Element):  # TODO сделать физику как у воды
+class LavaElement(Element):  # TODO сделать физику лавы и исправить камень
     def __init__(self, name, image_path, pos, temperature):
         super().__init__(name, image_path, pos)
         self.temperature = temperature
