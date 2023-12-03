@@ -125,8 +125,8 @@ class Menu:
                          [0, 0], 25, 7, 1000, False, self.space))
         sand_button = Button(
             'images/sand.png', (625, 525), 'песок',
-            LiquidElement('песок', 'images/sand_frame.png', [0, 0], 0, 10, 0,
-                          self.space))
+            LiquidElement('песок', 'images/sand_frame.png', [0, 0], 0, 10,
+                          100000, self.space))
         oak_button = Button(
             'images/oak.png', (1000, 525), 'дуб',
             WoodElement('дуб', 'images/oak_frame.png',

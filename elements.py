@@ -50,7 +50,10 @@ class SteamElement(Element):
             pygame.sprite.Sprite.kill(self)
 
 
-class SolidElement(Element):  # TODO иногда происходит такая ошибка при взаимодействии с кислотой AssertionError: shape not in space, already removed?
+# TODOпри взаимодействии с кислотой AssertionError: shape not in space
+
+
+class SolidElement(Element):
     def __init__(self, name, image_path, pos, solidity,
                  fragility, temperature_resistance, is_melting, space):
         super().__init__(name, image_path, pos)
@@ -87,7 +90,7 @@ class SolidElement(Element):  # TODO иногда происходит така�
                 if self.solidity < sprite_2.ph:
                     try:
                         self.groups()[0].add(SteamElement('пар', 'images/пар.png', [self.rect.x, self.rect.y]))  # noqa
-                    except IndexError:
+                    except IndexError or AssertionError:
                         pass
                     self.kill()
             elif isinstance(sprite_2, FireElement):
@@ -124,7 +127,7 @@ class FireElement(Element):
                 self.kill()
 
 
-class LiquidElement(Element):  # TODO испарение воды от огня и песок испаряется от огня
+class LiquidElement(Element):  # TODO испарение воды от огня
     def __init__(self, name, image_path, pos, ph,
                  liquidity, evaporation_temperature, space):
         super().__init__(name, image_path, pos)
@@ -192,7 +195,10 @@ class LiquidElement(Element):  # TODO испарение воды от огня 
     #                 self.rect.x = sprite_2.rect.x - sprite_2.rect.width
 
 
-class ExplodingElement(Element):  # TODO  вода уничтожает C-4 и C-4 не взрывается
+# TODO  вода уничтожает C-4 и цепная реакция для C-4 и сделать сегменты
+
+
+class ExplodingElement(Element):
     def __init__(self, name, image_path, pos, explosion_power):
         super().__init__(name, image_path, pos)
         self.explosion_power = explosion_power
