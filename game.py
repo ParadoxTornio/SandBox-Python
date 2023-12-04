@@ -1,8 +1,9 @@
 import pygame
 import copy
-from config import WIDTH, HEIGHT, FPS, GRAVITY
+from config import WIDTH, HEIGHT, FPS, GRAVITY, ELEMENT_SELECTED
 # , BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
-from menu import Menu, ELEMENT_SELECTED
+from menu import Menu
+from eraser import Eraser_menu
 from pymunk import Space, pygame_util, Segment
 from utils import custom_collision
 
@@ -40,6 +41,8 @@ class Game:
             'images/unselected button.png').convert_alpha()
 
         self.menu = Menu(self.screen, self.space)
+        self.eraser_menu = Eraser_menu(self.screen)
+
         pygame.display.flip()
         self.running = True
         self.selected_element = None
@@ -79,7 +82,7 @@ class Game:
         self.space.step(1 / FPS)
         self.elements_group.update()
 
-    def erase_element(self, mouse_pos):  # TODO сделать выбор размера стирки
+    def erase_element(self, mouse_pos):
         for sprite in self.elements_group.sprites():
             if sprite.rect.collidepoint(mouse_pos):
                 sprite.kill()
@@ -96,7 +99,9 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == ELEMENT_SELECTED:
-                self.selected_element = event.message
+                if event.message is not None:
+                    self.selected_element = event.message
+                    self.eraser_menu.is_open = False
             elif (mouse_event[0] or mouse_event[2]) and \
                     self.selected_element and \
                     self.table_rect.collidepoint(mouse_pos):
@@ -104,10 +109,26 @@ class Game:
                     if self.selected_element != 'eraser':
                         self.add_element()
                     else:
-                        self.erase_element(mouse_pos)
+                        if self.eraser_menu.selected_button == \
+                                self.eraser_menu.button_8x8:
+                            self.erase_element(mouse_pos)
+                        elif self.eraser_menu.selected_button == \
+                                self.eraser_menu.button_16x16:
+                            for x in range(mouse_pos[0] - 8,
+                                           mouse_pos[0] + 9, 8):
+                                for y in range(mouse_pos[1] - 8,
+                                               mouse_pos[1] + 9, 8):
+                                    self.erase_element((x, y))
+                        else:
+                            for x in range(mouse_pos[0] - 16,
+                                           mouse_pos[0] + 17, 8):
+                                for y in range(mouse_pos[1] - 16,
+                                               mouse_pos[1] + 17, 8):
+                                    self.erase_element((x, y))
                 elif mouse_event[2]:
                     self.selected_element = None
                     self.menu.unselect_button()
+                    self.eraser_menu.is_open = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 and \
                         self.clear_rect.collidepoint(mouse_pos):
@@ -123,8 +144,12 @@ class Game:
                         self.eraser_rect.collidepoint(mouse_pos):
                     self.selected_element = 'eraser'
                     self.menu.unselect_button()
+                    self.eraser_menu.is_open = True
 
             self.menu.handle_events(event)
+            self.eraser_menu.handle_events(event)
+
+    def draw_options(self):
         key = pygame.key.get_pressed()
 
         if key[pygame.K_d]:
@@ -147,6 +172,7 @@ class Game:
 
         if self.selected_element == 'eraser':
             self.screen.blit(self.selected_button_picture, (100, 25))
+            self.eraser_menu.draw()
         else:
             self.screen.blit(self.unselected_button_picture, (100, 25))
 

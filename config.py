@@ -1,3 +1,5 @@
+import pygame
+
 TITLE = "SandBox"
 WIDTH = 1280
 HEIGHT = 660
@@ -11,6 +13,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
+
+ELEMENT_SELECTED = pygame.USEREVENT + 1
 
 all_elements = ['вода', 'огонь', 'металл',
                 'укреплённый металл', 'бетон',
