@@ -10,11 +10,11 @@ class Eraser_menu:
         self.is_open = False
         self.background_image = pygame.image.load(
             'images/eraser buttons background.png')
-        self.button_8x8 = Button('images/unselected button.png', (181, 15),
+        self.button_8x8 = Button('images/unselected button.png', (181, 8),
                                  'small')
-        self.button_16x16 = Button('images/unselected button.png', (256, 15),
+        self.button_16x16 = Button('images/unselected button.png', (256, 8),
                                    'medium')
-        self.button_32x32 = Button('images/unselected button.png', (331, 15),
+        self.button_32x32 = Button('images/unselected button.png', (331, 8),
                                    'large')
         self.selected_button = self.button_8x8
         self.button_8x8.select_button()
@@ -25,7 +25,7 @@ class Eraser_menu:
 
     def draw(self):
         if self.is_open:
-            self.screen.blit(self.background_image, (160, 0))
+            self.screen.blit(self.background_image, (155, 0))
             self.eraser_buttons_group.draw(self.screen)
 
     def unselect_button(self):
