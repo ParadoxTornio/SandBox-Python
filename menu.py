@@ -44,14 +44,16 @@ class Menu:
                          [0, 0], 10, 5, 500, True, self.space))
         c4_button = Button(
             'images/C4.png', (925, 525), 'C-4',
-            ExplodingElement('C-4', 'images/C4_frame.png', [0, 0], 15))
+            ExplodingElement('C-4', 'images/C4_frame.png',
+                             [0, 0], 15, self.space))
         buf_metal_button = Button(
             'images/buffed_metal.png', (325, 525), 'металл+',
             SolidElement('металл+', 'images/metal_plus_frame.png',
                          [0, 0], 50, 5, 1250, True, self.space))
         lava_button = Button(
             'images/lava.png', (700, 525), 'лава',
-            LavaElement('лава', 'images/lava_frame.png', [0, 0], 1200))
+            LavaElement('лава', 'images/lava_frame.png',
+                        [0, 0], 1200, self.space))
         poison_button = Button(
             'images/poison.png', (775, 525), 'кислота',
             LiquidElement('кислота', 'images/poison_frame.png',

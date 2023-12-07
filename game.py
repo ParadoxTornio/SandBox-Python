@@ -39,6 +39,12 @@ class Game:
 
         self.unselected_button_picture = pygame.image.load(
             'images/unselected button.png').convert_alpha()
+        self.small_eraser_surface = pygame.Surface((8, 8), pygame.SRCALPHA)
+        self.small_eraser_surface.fill((255, 255, 255, 128))
+        self.medium_eraser_surface = pygame.Surface((16, 16), pygame.SRCALPHA)
+        self.medium_eraser_surface.fill((255, 255, 255, 128))
+        self.large_eraser_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
+        self.large_eraser_surface.fill((255, 255, 255, 128))
 
         self.menu = Menu(self.screen, self.space)
         self.eraser_menu = Eraser_menu(self.screen)
@@ -165,16 +171,24 @@ class Game:
     def draw(self):
         self.screen.blit(self.background, (0, 0))
         self.elements_group.draw(self.screen)
+        mouse_pos = pygame.mouse.get_pos()
 
         self.menu.draw()
         self.screen.blit(self.clear_picture, (25, 25))
         self.screen.blit(self.eraser_picture, (100, 25))
 
         if self.selected_element == 'eraser':
-            self.screen.blit(self.selected_button_picture, (100, 25))
             self.eraser_menu.draw()
-        else:
-            self.screen.blit(self.unselected_button_picture, (100, 25))
+            if self.eraser_menu.selected_button == self.eraser_menu.button_8x8:
+                self.screen.blit(self.small_eraser_surface,
+                                 (mouse_pos[0] - 4, mouse_pos[1] - 4))
+            elif self.eraser_menu.selected_button ==\
+                    self.eraser_menu.button_16x16:
+                self.screen.blit(self.medium_eraser_surface,
+                                 (mouse_pos[0] - 8, mouse_pos[1] - 8))
+            else:
+                self.screen.blit(self.large_eraser_surface,
+                                 (mouse_pos[0] - 16, mouse_pos[1] - 16))
 
         pygame.display.flip()
 

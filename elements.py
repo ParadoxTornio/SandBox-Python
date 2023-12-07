@@ -31,11 +31,6 @@ class Element(pygame.sprite.Sprite):
         new_instance = self.__class__(self.name, self.image_path, self.pos)
         return new_instance
 
-    def interaction(self, sprite_2):
-        if self.groups() == sprite_2.groups() and \
-                self.name == sprite_2.name:
-            sprite_2.kill()
-
 
 class SteamElement(Element):
     def __init__(self, name, image_path, pos):
@@ -49,8 +44,8 @@ class SteamElement(Element):
         elif time.perf_counter() - self.time_on_screen >= 2.5:
             pygame.sprite.Sprite.kill(self)
 
-
-# TODOпри взаимодействии с кислотой AssertionError: shape not in space
+    def interaction(self, sprite_2):
+        pass
 
 
 class SolidElement(Element):
@@ -62,9 +57,12 @@ class SolidElement(Element):
         self.fragility = fragility
         self.temperature_resistance = temperature_resistance
         self.is_melting = is_melting
+        self.is_killed = False
 
     def change_position(self, pos):
+        pos = (pos[0] // 8 * 8, pos[1] // 8 * 8)
         super().change_position(pos)
+
         self.metal_block = Segment(
             self.space.static_body,
             (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 - 1),
@@ -80,11 +78,15 @@ class SolidElement(Element):
         return new_instance
 
     def kill(self):
-        self.space.remove(self.metal_block)
-        super().kill()
+        if not self.is_killed:
+            self.space.remove(self.metal_block)
+            super().kill()
+            self.is_killed = True
 
     def interaction(self, sprite_2):
-        super().interaction(sprite_2)
+        if self.groups() == sprite_2.groups() and \
+                self.name == sprite_2.name:
+            sprite_2.kill()
         if not isinstance(sprite_2, SolidElement):
             if isinstance(sprite_2, LiquidElement):
                 if self.solidity < sprite_2.ph:
@@ -117,6 +119,9 @@ class FireElement(Element):
             pygame.sprite.Sprite.kill(self)
 
     def interaction(self, sprite_2):
+        if self.groups() == sprite_2.groups() and \
+                self.name == sprite_2.name:
+            sprite_2.kill()
         if isinstance(sprite_2, LiquidElement):
             if self.temperature >= sprite_2.evaporation_temperature:
                 try:
@@ -127,7 +132,7 @@ class FireElement(Element):
                 self.kill()
 
 
-class LiquidElement(Element):  # TODO испарение воды от огня
+class LiquidElement(Element):
     def __init__(self, name, image_path, pos, ph,
                  liquidity, evaporation_temperature, space):
         super().__init__(name, image_path, pos)
@@ -166,47 +171,28 @@ class LiquidElement(Element):  # TODO испарение воды от огня
         return new_instance
 
     def kill(self):
-        # self.space.remove(self.water_shape.body)
         self.space.remove(self.water_shape)
         super().kill()
 
     def interaction(self, sprite_2):
         pass
-    #     if isinstance(sprite_2, FireElement):
-    #         if sprite_2.temperature >= self.evaporation_temperature:
-    #             try:
-    #                 self.groups()[0].add(SteamElement('пар', 'images/пар.png', [self.rect.x, self.rect.y]))  # noqa
-    #             except IndexError:
-    #                 pass
-    #             self.kill()
-    #             sprite_2.kill()
-    #     elif isinstance(sprite_2, LiquidElement):
-    #         if sprite_2.rect.x >= 0 and sprite_2.rect.right <= WIDTH or \
-    #                 self.rect.x >= 0 and self.rect.right <= WIDTH:
-    #             self.previous_x_position = self.rect.x
-    #             if not self.direction:
-    #                 if random.random() <= 0.5:
-    #                     self.direction = 'Right'
-    #                 else:
-    #                     self.direction = 'Left'
-    #             elif self.direction == 'Right':
-    #                 self.rect.x = sprite_2.rect.x + sprite_2.rect.width
-    #             else:
-    #                 self.rect.x = sprite_2.rect.x - sprite_2.rect.width
 
 
 # TODO  вода уничтожает C-4 и цепная реакция для C-4 и сделать сегменты
 
 
 class ExplodingElement(Element):
-    def __init__(self, name, image_path, pos, explosion_power):
+    def __init__(self, name, image_path, pos, explosion_power, space):
         super().__init__(name, image_path, pos)
         self.explosion_power = explosion_power
+        self.space = space
+        self.is_killed = False
+        self.is_blown_up = False
 
     def __copy__(self):
         new_instance = self.__class__(
             self.name, self.image_path, self.pos,
-            self.explosion_power)
+            self.explosion_power, self.space)
         return new_instance
 
     def explode(self):
@@ -214,11 +200,39 @@ class ExplodingElement(Element):
         self.rect.width = self.explosion_power * 12.5
         self.rect.height = self.explosion_power * 12.5
         self.rect.center = center
+        self.image = pygame.Surface((self.rect.width, self.rect.height),
+                                    pygame.SRCALPHA)
+        self.image.fill((255, 255, 255, 128))
+
+    def kill(self):
+        if not self.is_killed:
+            self.space.remove(self.exploding_block)
+            super().kill()
+            self.is_killed = True
+
+    def change_position(self, pos):
+        pos = (pos[0] // 8 * 8, pos[1] // 8 * 8)
+        super().change_position(pos)
+
+        self.exploding_block = Segment(
+            self.space.static_body,
+            (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 - 1),
+            (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 + 1),
+            BLOCK_SIZE // 2 - 1)
+        self.space.add(self.exploding_block)
 
     def interaction(self, sprite_2):
-        super().interaction(sprite_2)
-        if isinstance(sprite_2, FireElement):
+        if self.groups() == sprite_2.groups() and \
+                self.name == sprite_2.name:
+            sprite_2.kill()
+        elif isinstance(sprite_2, FireElement):
             self.explode()
+            self.is_blown_up = True
+        elif isinstance(sprite_2, ExplodingElement):
+            if self.is_blown_up:
+                if not sprite_2.is_blown_up:
+                    sprite_2.explode()
+                    sprite_2.is_blown_up = True
         elif isinstance(sprite_2, SolidElement):
             if self.explosion_power >= sprite_2.solidity:
                 sprite_2.kill()
@@ -231,6 +245,13 @@ class ExplodingElement(Element):
             if self.explosion_power >= sprite_2.solidity:
                 self.kill()
                 sprite_2.kill()
+        elif isinstance(sprite_2, LiquidElement):
+            if sprite_2.ph > 0:
+                try:
+                    self.groups()[0].add(SteamElement('пар', 'images/пар.png', [self.rect.x, self.rect.y]))  # noqa
+                except IndexError or AssertionError:
+                    pass
+                self.kill()
         else:
             self.kill()
 
@@ -263,7 +284,9 @@ class WoodElement(Element):
         return new_instance
 
     def interaction(self, sprite_2):
-        super().interaction(sprite_2)
+        if self.groups() == sprite_2.groups() and \
+                self.name == sprite_2.name:
+            sprite_2.kill()
         if isinstance(sprite_2, FireElement):
             if self.temperature_resistance < sprite_2.temperature:
                 self.kill()
@@ -300,7 +323,9 @@ class GlassElement(Element):
         return new_instance
 
     def interaction(self, sprite_2):
-        super().interaction(sprite_2)
+        if self.groups() == sprite_2.groups() and \
+                self.name == sprite_2.name:
+            sprite_2.kill()
         if isinstance(sprite_2, FireElement):
             if sprite_2.temperature >= self.temperature_resistance:
                 self.kill()
@@ -309,31 +334,43 @@ class GlassElement(Element):
                 self.kill()
 
 
-class LavaElement(Element):  # TODO сделать физику лавы и исправить камень
-    def __init__(self, name, image_path, pos, temperature):
+class LavaElement(Element):
+    def __init__(self, name, image_path, pos, temperature, space):
         super().__init__(name, image_path, pos)
         self.temperature = temperature
-        self.gravity = True
-        self.time_on_screen = None
+        self.space = space
+        self.is_killed = False
+        self.image = pygame.Surface((16, 16))
+        self.image.blit(self.picture, (0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.pos[0]
+        self.rect.y = self.pos[1]
+
+        lava_body = Body(10, 100)
+        lava_body.position = pos
+        self.lava_shape = Circle(lava_body, 5, (0, 0))
+        self.lava_shape.friction = 0
+        space.add(lava_body, self.lava_shape)
 
     def update(self):
-        if self.gravity:
-            if self.rect.y <= 503:
-                self.rect.y += 1
-            else:
-                self.gravity = False
-        else:
-            if not self.time_on_screen:
-                self.time_on_screen = time.perf_counter()
-            elif time.perf_counter() - self.time_on_screen >= 3:
-                self.groups()[0].add(SolidElement('камень', 'images/stone_frame.png', [self.rect.x, self.rect.y]  # noqa
-                                                  , 15, 5, 1000, False, self.space))  # noqa
-                self.kill()
+        self.rect.x = self.lava_shape.body.position[0] - 8
+        self.rect.y = self.lava_shape.body.position[1] - 8
 
     def __copy__(self):
         new_instance = self.__class__(
-            self.name, self.image_path, self.pos, self.temperature)
+            self.name, self.image_path, self.pos, self.temperature, self.space)
         return new_instance
+
+    def change_position(self, pos):
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.lava_shape.body.position = pos[0] + 8, pos[1] + 8
+
+    def kill(self):
+        if not self.is_killed:
+            self.space.remove(self.lava_shape)
+            super().kill()
+            self.is_killed = True
 
     def interaction(self, sprite_2):
         if isinstance(sprite_2, LiquidElement):
@@ -342,9 +379,37 @@ class LavaElement(Element):  # TODO сделать физику лавы и ис
                     cords = [self.rect.x, self.rect.y]
                 else:
                     cords = [sprite_2.rect.x, sprite_2.rect.y]
-                self.groups()[0].add(SteamElement('пар', 'images/пар.png', cords))  # noqa
-                self.groups()[0].add(SolidElement('камень', 'images/stone_frame.png', cords  # noqa
-                                                  , 15, 5, 1000, False, self.space))  # noqa
+                self.steam_element = SteamElement(
+                    'пар', 'images/пар.png', cords)
+                self.solid_element1 = SolidElement('камень',
+                                                   'images/stone_frame.png',
+                                                   [0, 0], 15, 5, 1000, False,
+                                                   self.space)
+                self.solid_element2 = SolidElement('камень',
+                                                   'images/stone_frame.png',
+                                                   [0, 0], 15, 5, 1000, False,
+                                                   self.space)
+                self.solid_element3 = SolidElement('камень',
+                                                   'images/stone_frame.png',
+                                                   [0, 0], 15, 5, 1000, False,
+                                                   self.space)
+                self.solid_element4 = SolidElement('камень',
+                                                   'images/stone_frame.png',
+                                                   [0, 0], 15, 5, 1000, False,
+                                                   self.space)
+                self.solid_element1.change_position(cords)
+                self.solid_element2.change_position(
+                    (cords[0] + 8, cords[1]))
+                self.solid_element3.change_position(
+                    (cords[0], cords[1] - 8))
+                self.solid_element4.change_position(
+                    (cords[0] + 8, cords[1] - 8))
+                self.groups()[0].add(self.steam_element)
+                self.groups()[0].add(self.solid_element1)
+                self.groups()[0].add(self.solid_element2)
+                self.groups()[0].add(self.solid_element3)
+                self.groups()[0].add(self.solid_element4)
+
             except IndexError:
                 pass
             sprite_2.kill()
@@ -352,8 +417,6 @@ class LavaElement(Element):  # TODO сделать физику лавы и ис
         if isinstance(sprite_2, SolidElement):
             if self.temperature >= sprite_2.temperature_resistance:
                 sprite_2.kill()
-            else:
-                self.gravity = False
         if isinstance(sprite_2, WoodElement):
             if self.temperature >= sprite_2.temperature_resistance:
                 sprite_2.kill()
