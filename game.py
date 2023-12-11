@@ -4,6 +4,7 @@ from config import WIDTH, HEIGHT, FPS, GRAVITY, ELEMENT_SELECTED
 # , BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
 from menu import Menu
 from eraser import Eraser_menu
+from load_and_save import LoadAllButton, SaveAllButton
 from pymunk import Space, pygame_util, Segment
 from utils import custom_collision
 
@@ -39,20 +40,30 @@ class Game:
 
         self.unselected_button_picture = pygame.image.load(
             'images/unselected button.png').convert_alpha()
+
         self.small_eraser_surface = pygame.Surface((8, 8), pygame.SRCALPHA)
         self.small_eraser_surface.fill((255, 255, 255, 128))
+
         self.medium_eraser_surface = pygame.Surface((16, 16), pygame.SRCALPHA)
         self.medium_eraser_surface.fill((255, 255, 255, 128))
+
         self.large_eraser_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
         self.large_eraser_surface.fill((255, 255, 255, 128))
 
         self.menu = Menu(self.screen, self.space)
+
         self.eraser_menu = Eraser_menu(self.screen)
 
-        pygame.display.flip()
+        self.load_all_button = LoadAllButton(
+            'images/diskette.png', (1130, 25), '')
+
+        self.save_all_button = SaveAllButton(
+            'images/diskette.png', (1055, 25), '')
+
         self.running = True
         self.selected_element = None
         self.elements_group = pygame.sprite.Group()
+        self.save_and_load_buttons_group = pygame.sprite.Group()
         self.options = pygame_util.DrawOptions(self.screen)
         self.draw_options = False
 
@@ -71,6 +82,9 @@ class Game:
         self.space.add(self.segment_floor)
         self.space.add(self.segment_left_wall)
         self.space.add(self.segment_right_wall)
+
+        self.save_and_load_buttons_group.add(self.save_all_button)
+        self.save_and_load_buttons_group.add(self.load_all_button)
 
     def new(self):
         self.run()
@@ -152,6 +166,8 @@ class Game:
                     self.menu.unselect_button()
                     self.eraser_menu.is_open = True
 
+            self.save_and_load_buttons_group.update(event, self.elements_group)
+
             self.menu.handle_events(event)
             self.eraser_menu.handle_events(event)
 
@@ -176,6 +192,7 @@ class Game:
         self.menu.draw()
         self.screen.blit(self.clear_picture, (25, 25))
         self.screen.blit(self.eraser_picture, (100, 25))
+        self.save_and_load_buttons_group.draw(self.screen)
 
         if self.selected_element == 'eraser':
             self.eraser_menu.draw()

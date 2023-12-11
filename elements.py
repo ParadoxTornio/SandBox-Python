@@ -150,6 +150,7 @@ class LiquidElement(Element):
         water_body.position = pos
         self.water_shape = Circle(water_body, 5, (0, 0))
         self.water_shape.friction = 0
+        # TODO переделать песок
         if name == 'песок':
             self.water_shape.friction = 10
             self.water_shape.body.moment = 10000
@@ -178,7 +179,7 @@ class LiquidElement(Element):
         pass
 
 
-# TODO  вода уничтожает C-4 и цепная реакция для C-4 и сделать сегменты
+# TODO  цепная реакция для C-4 и сделать сегменты
 
 
 class ExplodingElement(Element):
