@@ -2,13 +2,14 @@ import pickle
 import pygame
 # from game import
 from buttons import Button
+from config import LOAD_GAME
 
 
 class SaveAllButton(Button):
     def __init__(self, image_path, position, text, element_object=None):
         super().__init__(image_path, position, text, element_object)
         self.start_time = 0
-        self.selected_picture = pygame.image.load('images/diskette2.png')
+        self.selected_picture = pygame.image.load('images/diskette_save.png')
         self.image = pygame.Surface((50, 50))
         self.image.blit(self.picture, (0, 0))
         self.is_pressed = False
@@ -44,6 +45,8 @@ class LoadAllButton(SaveAllButton):
     def click_action(self, list_of_sprites):
         try:
             with open('game.save', 'rb') as file:
-                list_of_sprites = pickle.load(file)
+                data = pickle.load(file)
+                pygame.event.post(
+                    pygame.event.Event(LOAD_GAME, message=data))
         except Exception:
             pass

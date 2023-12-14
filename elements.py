@@ -373,6 +373,8 @@ class LavaElement(Element):
             super().kill()
             self.is_killed = True
 
+    # TODO: исправить спавн камня после того как лава коснулась с водой
+
     def interaction(self, sprite_2):
         if isinstance(sprite_2, LiquidElement):
             try:

@@ -23,7 +23,7 @@ metal = []
 water = []
 
 metal_image = pygame.image.load('images/metal_frame.png')
-water_image = pygame.image.load('images/water_frame_2.png')
+water_image = pygame.image.load('images/water_frame.png')
 
 water_surface = pygame.Surface((16, 16))
 water_surface.blit(water_image, (0, 0))

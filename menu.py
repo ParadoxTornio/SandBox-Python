@@ -33,7 +33,7 @@ class Menu:
     def create_buttons(self):
         water_button = Button(
             'images/water.png', (100, 525), 'вода',
-            LiquidElement('вода', 'images/water_frame_2.png',
+            LiquidElement('вода', 'images/water_frame.png',
                           [0, 0], 0, 10, 100, self.space))
         fire_button = Button(
             'images/fire.png', (175, 525), 'огонь',
