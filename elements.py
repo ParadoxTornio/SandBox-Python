@@ -37,6 +37,10 @@ class SteamElement(Element):
         super().__init__(name, image_path, pos)
         self.time_on_screen = None
 
+    def change_position(self, pos):
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+
     def update(self):
         self.rect.y -= 2
         if not self.time_on_screen:

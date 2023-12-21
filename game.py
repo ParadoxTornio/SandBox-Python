@@ -1,14 +1,22 @@
 import pygame
 import copy
-from config import WIDTH, HEIGHT, FPS, GRAVITY, ELEMENT_SELECTED, LOAD_GAME
-# , BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
+from config import (
+    WIDTH,
+    HEIGHT,
+    FPS, GRAVITY,
+    ELEMENT_SELECTED,
+    LOAD_GAME,
+    LOAD_AREA,
+    SAVE_AREA
+)
 from menu import Menu
 from eraser import Eraser_menu
+from select_area_menu import SelectAreaMenu
 from load_and_save import LoadAllButton, SaveAllButton
 from pymunk import Space, pygame_util, Segment
 from utils import custom_collision
 from elements import FireElement, ExplodingElement, WoodElement, \
-    GlassElement, LavaElement, LiquidElement, SolidElement
+    GlassElement, LavaElement, LiquidElement, SolidElement, SteamElement
 
 
 class Game:
@@ -55,6 +63,8 @@ class Game:
         self.menu = Menu(self.screen, self.space)
 
         self.eraser_menu = Eraser_menu(self.screen)
+
+        self.select_area_menu = SelectAreaMenu(self.screen)
 
         self.load_all_button = LoadAllButton(
             'images/diskette_load.png', (1130, 25), '')
@@ -118,6 +128,15 @@ class Game:
             if sprite.rect.collidepoint(mouse_pos):
                 sprite.kill()
 
+    def select_area(self):
+        print('select')
+
+    def save_area(self):
+        print('save')
+
+    def load_area(self):
+        print('load')
+
     def load_game(self, data):
         self.clear_screen()
         for coords, name in data:
@@ -125,6 +144,51 @@ class Game:
             if name == 'вода':
                 new_object = LiquidElement('вода', 'images/water_frame.png',
                                            [0, 0], 0, 10, 100, self.space)
+            elif name == 'огонь':
+                new_object = FireElement(
+                    'огонь', 'images/fire_frame.png', [0, 0], 1000)
+            elif name == 'металл':
+                new_object = SolidElement('металл', 'images/metal_frame.png',
+                                          [0, 0], 10, 5, 500, True, self.space)
+            elif name == 'C-4':
+                new_object = ExplodingElement('C-4', 'images/C4_frame.png',
+                                              [0, 0], 15, self.space)
+            elif name == 'металл+':
+                new_object = SolidElement('металл+',
+                                          'images/metal_plus_frame.png',
+                                          [0, 0], 50, 5, 1250, True,
+                                          self.space)
+            elif name == 'лава':
+                new_object = LavaElement('лава', 'images/lava_frame.png',
+                                         [0, 0], 1200, self.space)
+            elif name == 'кислота':
+                new_object = LiquidElement('кислота',
+                                           'images/poison_frame.png',
+                                           [0, 0], 30, 15, 350, self.space)
+            elif name == 'кирпичи':
+                new_object = SolidElement('кирпичи', 'images/bricks_frame.png',
+                                          [0, 0], 10, 10, 1000, False,
+                                          self.space)
+            elif name == 'бетон':
+                new_object = SolidElement('бетон', 'images/concrete_frame.png',
+                                          [0, 0], 25, 7, 1000, False,
+                                          self.space)
+            elif name == 'песок':
+                new_object = LiquidElement('песок', 'images/sand_frame.png',
+                                           [0, 0], 0, 10, 100000, self.space)
+            elif name == 'дуб':
+                new_object = WoodElement('дуб', 'images/oak_frame.png',
+                                         [0, 0], 5, 900, self.space)
+            elif name == 'стекло':
+                new_object = GlassElement('стекло', 'images/glass_frame.png',
+                                          [0, 0], 5, 550, self.space)
+            elif name == 'камень':
+                new_object = SolidElement('камень', 'images/stone_frame.png',
+                                          [0, 0], 15, 5, 1000, False,
+                                          self.space)
+            elif name == 'пар':
+                new_object = SteamElement(
+                    'пар', 'images/пар.png', coords)
             new_object.change_position(coords)
             self.elements_group.add(new_object)
 
@@ -158,6 +222,14 @@ class Game:
                 if event.message is not None:
                     self.selected_element = event.message
                     self.eraser_menu.is_open = False
+                    self.select_area_menu.unselect_button()
+
+            elif event.type == LOAD_AREA:
+                self.load_area()
+                self.menu.unselect_button()
+            elif event.type == SAVE_AREA:
+                self.save_area()
+                self.menu.unselect_button()
 
             elif (mouse_event[0] or mouse_event[2]) and \
                     self.selected_element and \
@@ -189,6 +261,7 @@ class Game:
                     self.selected_element = None
                     self.menu.unselect_button()
                     self.eraser_menu.is_open = False
+                    self.select_area_menu.unselect_button()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 and \
@@ -200,6 +273,7 @@ class Game:
                     self.selected_element = 'eraser'
                     self.menu.unselect_button()
                     self.eraser_menu.is_open = True
+                    self.select_area_menu.unselect_button()
 
                 # elif event.button == 3:
                 #     if self.line_point1 is None:
@@ -219,6 +293,7 @@ class Game:
             self.save_and_load_buttons_group.update(event, self.elements_group)
 
             self.menu.handle_events(event)
+            self.select_area_menu.handle_events(event)
             self.eraser_menu.handle_events(event)
 
     def draw_options(self):
@@ -243,6 +318,7 @@ class Game:
         self.screen.blit(self.clear_picture, (25, 25))
         self.screen.blit(self.eraser_picture, (100, 25))
         self.save_and_load_buttons_group.draw(self.screen)
+        self.select_area_menu.draw()
 
         if self.selected_element == 'eraser':
             self.eraser_menu.draw()

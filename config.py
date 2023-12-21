@@ -3,7 +3,7 @@ import pygame
 TITLE = "SandBox"
 WIDTH = 1280
 HEIGHT = 660
-FPS = 120
+FPS = 60
 GRAVITY = (0, 900)
 BLOCK_SIZE = 8
 
@@ -16,6 +16,8 @@ YELLOW = (255, 255, 0)
 
 ELEMENT_SELECTED = pygame.USEREVENT + 1
 LOAD_GAME = pygame.USEREVENT + 2
+LOAD_AREA = pygame.USEREVENT + 3
+SAVE_AREA = pygame.USEREVENT + 4
 
 all_elements = ['вода', 'огонь', 'металл',
                 'укреплённый металл', 'бетон',

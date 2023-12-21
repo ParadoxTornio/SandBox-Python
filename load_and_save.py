@@ -41,6 +41,7 @@ class SaveAllButton(Button):
 class LoadAllButton(SaveAllButton):
     def __init__(self, image_path, position, text, element_object=None):
         super().__init__(image_path, position, text, element_object)
+        self.selected_picture = pygame.image.load('images/diskette_load_2.png')
 
     def click_action(self, list_of_sprites):
         try:
