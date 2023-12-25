@@ -1,5 +1,6 @@
 import pygame
 import copy
+import pickle
 from config import (
     WIDTH,
     HEIGHT,
@@ -7,7 +8,8 @@ from config import (
     ELEMENT_SELECTED,
     LOAD_GAME,
     LOAD_AREA,
-    SAVE_AREA
+    SAVE_AREA,
+    BLOCK_SIZE
 )
 from menu import Menu
 from eraser import Eraser_menu
@@ -71,6 +73,7 @@ class Game:
 
         self.save_all_button = SaveAllButton(
             'images/diskette_save.png', (1055, 25), '')
+        self.cursor_image = pygame.image.load('images/cross.png')
 
         self.running = True
         self.selected_element = None
@@ -98,8 +101,9 @@ class Game:
         self.save_and_load_buttons_group.add(self.save_all_button)
         self.save_and_load_buttons_group.add(self.load_all_button)
 
-        self.line_point1 = None
-        self.line_point2 = None
+        self.save_point1 = None
+        self.save_point2 = None
+        self.is_save_mode = False
 
     def new(self):
         self.run()
@@ -128,11 +132,32 @@ class Game:
             if sprite.rect.collidepoint(mouse_pos):
                 sprite.kill()
 
-    def select_area(self):
-        print('select')
+    def save_area(self, number_of_file):
+        min_x = min(self.save_point1[0], self.save_point2[0])
+        min_x = min_x // BLOCK_SIZE * BLOCK_SIZE
+        min_y = min(self.save_point1[1], self.save_point2[1])
+        min_y = min_y // BLOCK_SIZE * BLOCK_SIZE
+        max_x = max(self.save_point1[0], self.save_point2[0])
+        max_x = (max_x + BLOCK_SIZE - 1) // BLOCK_SIZE * BLOCK_SIZE
+        max_y = max(self.save_point1[1], self.save_point2[1])
+        max_y = (max_y + BLOCK_SIZE - 1) // BLOCK_SIZE * BLOCK_SIZE
+        with open(f'{number_of_file}_area.save', 'wb') as file:
+            data = []
 
-    def save_area(self):
-        print('save')
+            for sprite in self.elements_group:
+                if sprite.rect.x >= min_x and sprite.rect.x <= max_x and \
+                        sprite.rect.y >= min_y and sprite.rect.y <= max_y:
+                    data.append(((sprite.rect.x, sprite.rect.y), sprite.name))
+
+            pickle.dump(data, file)
+        self.save_point1 = None
+        self.save_point2 = None
+        self.is_save_mode = False
+        pygame.mouse.set_visible(True)
+
+    def select_area(self):
+        pygame.mouse.set_visible(False)
+        self.is_save_mode = True
 
     def load_area(self):
         print('load')
@@ -223,12 +248,14 @@ class Game:
                     self.selected_element = event.message
                     self.eraser_menu.is_open = False
                     self.select_area_menu.unselect_button()
+                    self.is_save_mode = False
+                    pygame.mouse.set_visible(True)
 
             elif event.type == LOAD_AREA:
                 self.load_area()
                 self.menu.unselect_button()
             elif event.type == SAVE_AREA:
-                self.save_area()
+                self.select_area()
                 self.menu.unselect_button()
 
             elif (mouse_event[0] or mouse_event[2]) and \
@@ -262,8 +289,15 @@ class Game:
                     self.menu.unselect_button()
                     self.eraser_menu.is_open = False
                     self.select_area_menu.unselect_button()
+                    self.is_save_mode = False
+                    pygame.mouse.set_visible(True)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+
+                if self.is_save_mode and event.button == 1 and \
+                        self.table_rect.collidepoint(mouse_pos):
+                    self.save_point1 = mouse_pos
+
                 if event.button == 1 and \
                         self.clear_rect.collidepoint(mouse_pos):
                     self.clear_screen()
@@ -274,18 +308,25 @@ class Game:
                     self.menu.unselect_button()
                     self.eraser_menu.is_open = True
                     self.select_area_menu.unselect_button()
+                    self.is_save_mode = False
+                    pygame.mouse.set_visible(True)
 
-                # elif event.button == 3:
-                #     if self.line_point1 is None:
-                #         self.line_point1 = (event.pos[0], event.pos[1])
-                # elif event.type == pygame.MOUSEBUTTONUP and event.button ==3:
-                #     if self.line_point1 is not None:
-
-                #         self.line_point2 = (event.pos[0], event.pos[1])
-                #         shape = Segment(
-                #             self.space.static_body, self.line_point1,
-                #             self.line_point2, 0.0)
-                #         self.space.add(shape)
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if self.is_save_mode and event.button == 1:
+                    self.save_point2 = mouse_pos
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1 and self.is_save_mode:
+                    self.save_area('1')
+                elif event.key == pygame.K_2 and self.is_save_mode:
+                    self.save_area('2')
+                elif event.key == pygame.K_3 and self.is_save_mode:
+                    self.save_area('3')
+                elif event.key == pygame.K_4 and self.is_save_mode:
+                    self.save_area('4')
+                elif event.key == pygame.K_5 and self.is_save_mode:
+                    self.save_area('5')
+                elif event.key == pygame.K_6 and self.is_save_mode:
+                    self.save_area('6')
 
             if event.type == LOAD_GAME:
                 self.load_game(event.message)
@@ -319,6 +360,29 @@ class Game:
         self.screen.blit(self.eraser_picture, (100, 25))
         self.save_and_load_buttons_group.draw(self.screen)
         self.select_area_menu.draw()
+
+        if self.is_save_mode:
+            self.screen.blit(self.cursor_image,
+                             (mouse_pos[0] - 12, mouse_pos[1] - 12))
+            if self.save_point1:
+                if self.save_point2:
+                    min_x = min(self.save_point1[0], self.save_point2[0])
+                    min_y = min(self.save_point1[1], self.save_point2[1])
+                    max_x = max(self.save_point1[0], self.save_point2[0])
+                    max_y = max(self.save_point1[1], self.save_point2[1])
+                    selected_surface = pygame.Surface(
+                        (max_x - min_x, max_y - min_y), pygame.SRCALPHA)
+                    selected_surface.fill((255, 255, 255, 128))
+                    self.screen.blit(selected_surface, (min_x, min_y))
+                else:
+                    min_x = min(self.save_point1[0], self.mouse_pos[0])
+                    min_y = min(self.save_point1[1], self.mouse_pos[1])
+                    max_x = max(self.save_point1[0], self.mouse_pos[0])
+                    max_y = max(self.save_point1[1], self.mouse_pos[1])
+                    selected_surface = pygame.Surface(
+                        (max_x - min_x, max_y - min_y), pygame.SRCALPHA)
+                    selected_surface.fill((255, 255, 255, 128))
+                    self.screen.blit(selected_surface, (min_x, min_y))
 
         if self.selected_element == 'eraser':
             self.eraser_menu.draw()
