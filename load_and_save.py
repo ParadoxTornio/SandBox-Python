@@ -15,7 +15,7 @@ class SaveAllButton(Button):
         self.is_pressed = False
 
     def click_action(self, list_of_sprites):
-        with open('game.save', 'wb') as file:
+        with open('saves/game.save', 'wb') as file:
             data = []
 
             for sprite in list_of_sprites:
@@ -45,7 +45,7 @@ class LoadAllButton(SaveAllButton):
 
     def click_action(self, list_of_sprites):
         try:
-            with open('game.save', 'rb') as file:
+            with open('saves/game.save', 'rb') as file:
                 data = pickle.load(file)
                 pygame.event.post(
                     pygame.event.Event(LOAD_GAME, message=data))

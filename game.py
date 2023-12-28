@@ -116,16 +116,10 @@ class Game:
             self.draw()
 
     def update(self):
-        # mouse_pos = pygame.mouse.get_pos()
         pygame.display.set_caption(
             f'{self.clock.get_fps()} amount: {len(self.elements_group)}')
         self.space.step(1 / FPS)
         self.elements_group.update()
-        # if self.line_point1 is not None:
-        #     p1 = int(self.line_point1[0]), int(self.line_point1[1])
-        #     p2 = mouse_pos[0], mouse_pos[1]
-        #     pygame.draw.lines(self.screen, pygame.Color("black"),
-        #                       False, [p1, p2])
 
     def erase_element(self, mouse_pos):
         for sprite in self.elements_group.sprites():
@@ -141,8 +135,15 @@ class Game:
         max_x = (max_x + BLOCK_SIZE - 1) // BLOCK_SIZE * BLOCK_SIZE
         max_y = max(self.save_point1[1], self.save_point2[1])
         max_y = (max_y + BLOCK_SIZE - 1) // BLOCK_SIZE * BLOCK_SIZE
-        with open(f'{number_of_file}_area.save', 'wb') as file:
+        file_name = ''
+        if number_of_file == '0':
+            file_name = 'saves/game.save'
+        else:
+            file_name = f'saves/{number_of_file}_area.save'
+        with open(file_name, 'wb') as file:
             data = []
+            if number_of_file != '0':
+                data.append(((min_x + max_x) // 2,  (min_y + max_y) // 2))
 
             for sprite in self.elements_group:
                 if sprite.rect.x >= min_x and sprite.rect.x <= max_x and \
@@ -153,7 +154,14 @@ class Game:
         self.save_point1 = None
         self.save_point2 = None
         self.is_save_mode = False
+        self.select_area_menu.save_button.unselect_button()
         pygame.mouse.set_visible(True)
+        self.draw()
+        selected_surface = pygame.Surface((max_x - min_x, max_y - min_y))
+        selected_surface.blit(self.screen, (0, 0),
+                              (min_x, min_y, max_x, max_y))
+        pygame.image.save(selected_surface,
+                          f'images/saved_screenshots/{number_of_file}.png')
 
     def select_area(self):
         pygame.mouse.set_visible(False)
@@ -256,6 +264,7 @@ class Game:
                 self.menu.unselect_button()
             elif event.type == SAVE_AREA:
                 self.select_area()
+                self.selected_element = None
                 self.menu.unselect_button()
 
             elif (mouse_event[0] or mouse_event[2]) and \
@@ -294,10 +303,12 @@ class Game:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
 
-                if self.is_save_mode and event.button == 1 and \
-                        self.table_rect.collidepoint(mouse_pos):
-                    self.save_point1 = mouse_pos
-
+                if self.is_save_mode and event.button == 1:
+                    if self.table_rect.collidepoint(mouse_pos):
+                        self.save_point1 = mouse_pos
+                    else:
+                        self.save_point1 = None
+                    self.save_point2 = None
                 if event.button == 1 and \
                         self.clear_rect.collidepoint(mouse_pos):
                     self.clear_screen()
@@ -313,7 +324,10 @@ class Game:
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.is_save_mode and event.button == 1:
-                    self.save_point2 = mouse_pos
+                    if self.table_rect.collidepoint(mouse_pos):
+                        self.save_point2 = mouse_pos
+                    else:
+                        self.save_point1 = None
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1 and self.is_save_mode:
                     self.save_area('1')
@@ -327,6 +341,8 @@ class Game:
                     self.save_area('5')
                 elif event.key == pygame.K_6 and self.is_save_mode:
                     self.save_area('6')
+                elif event.key == pygame.K_0 and self.is_save_mode:
+                    self.save_area('0')
 
             if event.type == LOAD_GAME:
                 self.load_game(event.message)
@@ -375,10 +391,10 @@ class Game:
                     selected_surface.fill((255, 255, 255, 128))
                     self.screen.blit(selected_surface, (min_x, min_y))
                 else:
-                    min_x = min(self.save_point1[0], self.mouse_pos[0])
-                    min_y = min(self.save_point1[1], self.mouse_pos[1])
-                    max_x = max(self.save_point1[0], self.mouse_pos[0])
-                    max_y = max(self.save_point1[1], self.mouse_pos[1])
+                    min_x = min(self.save_point1[0], mouse_pos[0])
+                    min_y = min(self.save_point1[1], mouse_pos[1])
+                    max_x = max(self.save_point1[0], mouse_pos[0])
+                    max_y = max(self.save_point1[1], mouse_pos[1])
                     selected_surface = pygame.Surface(
                         (max_x - min_x, max_y - min_y), pygame.SRCALPHA)
                     selected_surface.fill((255, 255, 255, 128))
@@ -414,91 +430,3 @@ game = Game()
 while game.running:
     game.new()
 pygame.quit()
-
-
-# Чтобы изменить курсор мыши на свою картинку в Pygame, вам понадобится
-# загрузить изображение и установить его в качестве курсора. Вот пример кода:
-# import pygame
-
-# # Инициализация Pygame
-# pygame.init()
-
-# # Загрузка изображения курсора
-# cursor_image = pygame.image.load("путь_к_вашей_картинке.png")
-
-# # Установка изображения курсора
-# pygame.mouse.set_cursor((24, 24), (0, 0),
-# *pygame.cursors.compile(pygame.cursors.sizer_x_strings))
-
-# # Создание окна
-# screen = pygame.display.set_mode((800, 600))
-
-# # Основной игровой цикл
-# running = True
-# while running:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             running = False
-
-#     # Отображение курсора
-#     screen.blit(cursor_image, pygame.mouse.get_pos())
-
-#     pygame.display.flip()
-
-# # Завершение работы Pygame
-# pygame.quit()
-# В этом примере мы используем функцию  `pygame.mouse.set_cursor()`  для
-# установки изображения курсора. Сначала мы загружаем картинку с помощью
-# `pygame.image.load()` . Затем мы используем функцию
-# `pygame.mouse.set_cursor()`  для установки изображения курсора.
-# В данном случае мы используем стандартный курсор  `sizer_x` , но вы можете
-# выбрать другой стандартный курсор или создать свой собственный.
-
-# После установки курсора мы отображаем его на экране с помощью функции
-# `screen.blit()` .  `pygame.mouse.get_pos()`  используется для получения
-# текущей позиции курсора.
-
-# Надеюсь, это поможет вам изменить курсор мыши на свою картинку в Pygame!
-
-
-# Чтобы вернуть стандартный курсор в Pygame после установки собственного
-# курсора, вы можете использовать функцию  `pygame.mouse.set_cursor()`  с
-# аргументом  `pygame.SYSTEM_CURSOR_ARROW` . Вот пример кода:
-# import pygame
-
-# # Инициализация Pygame
-# pygame.init()
-
-# # Загрузка изображения курсора
-# cursor_image = pygame.image.load("путь_к_вашей_картинке.png")
-
-# # Установка изображения курсора
-# pygame.mouse.set_cursor((24, 24), (0, 0),
-# *pygame.cursors.compile(pygame.cursors.sizer_x_strings))
-
-# # Создание окна
-# screen = pygame.display.set_mode((800, 600))
-
-# # Основной игровой цикл
-# running = True
-# while running:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             running = False
-
-#     # Отображение курсора
-#     screen.blit(cursor_image, pygame.mouse.get_pos())
-
-#     pygame.display.flip()
-
-# # Возвращение стандартного курсора
-# pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-
-# # Завершение работы Pygame
-# pygame.quit()
-# В этом примере, после основного игрового цикла, мы используем
-# `pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)` ,
-# чтобы вернуть стандартный курсор (стрелку). Это восстановит
-# стандартный курсор после того, как вы закончите использовать
-# собственный курсор.
-# Надеюсь, это помогает!
