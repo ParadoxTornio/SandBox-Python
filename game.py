@@ -19,6 +19,7 @@ from pymunk import Space, pygame_util, Segment
 from utils import custom_collision
 from elements import FireElement, ExplodingElement, WoodElement, \
     GlassElement, LavaElement, LiquidElement, SolidElement, SteamElement
+from load_menu import LoadMenu
 
 
 class Game:
@@ -168,7 +169,11 @@ class Game:
         self.is_save_mode = True
 
     def load_area(self):
-        print('load')
+        self.is_save_mode = False
+        pygame.mouse.set_visible(True)
+        load_menu = LoadMenu(self.screen)
+        if load_menu.choosen_area_number:
+            print(load_menu.choosen_area_number)
 
     def load_game(self, data):
         self.clear_screen()

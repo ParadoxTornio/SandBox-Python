@@ -1,13 +1,57 @@
 import pygame
+from config import FPS
 from os import listdir
+from sys import exit
 
 
 class LoadMenu:
     def __init__(self, screen):
         self.screen = screen
+        self.surface_width = 410
+        self.surface_height = 270
+        self.button_width = 420
+        self.button_height = 282
         self.background_image = pygame.image.load('images/load_menu.png')
         self.red_diskette_image = pygame.image.load('images/diskette_red.png')
         self.surfaces = []
+        self.clock = pygame.time.Clock()
+        self.buttons_rects = []
+        self.buttons_cords = [
+            (13, 87), (435, 87), (857, 87),
+            (13, 372), (435, 372), (857, 372)]
+        self.esc_rect = pygame.Rect((1205, 25), (50, 50))
+        self.is_open = True
+        self.choosen_area_number = None
+        self.load_images()
+        self.run()
+
+    def run(self):
+        while self.is_open:
+            self.events()
+            self.draw()
+            self.clock.tick(FPS)
+
+    def events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if self.esc_rect.collidepoint(mouse_pos):
+                    self.is_open = False
+                for number, rect in self.buttons_rects:
+                    if rect.collidepoint(mouse_pos):
+                        self.choosen_area_number = number
+                        self.is_open = False
+
+    def draw(self):
+        self.screen.blit(self.background_image, (0, 0))
+        for number, surface in enumerate(self.surfaces):
+            self.screen.blit(surface, self.buttons_cords[number])
+        pygame.display.update()
+
+    def load_images(self):
         files = listdir('saves')
         for i in range(6):
             surface = pygame.Surface((410, 270))
@@ -33,4 +77,10 @@ class LoadMenu:
                     if h <= 67:
                         new_image = pygame.transform.scale(
                             image, (w * 4, h * 4))
-                self.surfaces[number_of_file - 1].blit(new_image, (0, 0))
+                button_rect = pygame.Rect(
+                    self.buttons_cords[number_of_file - 1], (420, 282))
+                self.buttons_rects.append((number_of_file, button_rect))
+                self.surfaces[number_of_file - 1].fill('Black')
+                x = (self.surface_width - new_image.get_width()) // 2
+                y = (self.surface_height - new_image.get_height()) // 2
+                self.surfaces[number_of_file - 1].blit(new_image, (x, y))

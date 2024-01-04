@@ -1,6 +1,6 @@
 import pygame
-from config import WIDTH
-# , HEIGHT, FPS, BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
+# from config import WIDTH, HEIGHT, FPS, BLACK,
+# WHITE, BLUE, YELLOW, RED, GREEN, TITLE
 from elements import SolidElement, LiquidElement, FireElement, \
     ExplodingElement, WoodElement, GlassElement, LavaElement
 from buttons import Button, MenuButton
@@ -11,7 +11,7 @@ class Menu:
         self.screen = screen
         self.space = space
         self.elements_button = MenuButton(
-            'images/button_0.png', (WIDTH - 75, 25), '', self)
+            'images/button_0.png', (1205, 25), '', self)
         self.background_image = pygame.image.load('images/background.png')
         self.menu_buttons_group = pygame.sprite.Group()
         self.menu_buttons_group.add(self.elements_button)  # noqa
