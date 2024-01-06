@@ -13,12 +13,14 @@ class LoadMenu:
         self.button_height = 282
         self.background_image = pygame.image.load('images/load_menu.png')
         self.red_diskette_image = pygame.image.load('images/diskette_red.png')
+        self.selected_button_image = pygame.image.load(
+            'images/selected button for load menu.png')
         self.surfaces = []
         self.clock = pygame.time.Clock()
         self.buttons_rects = []
         self.buttons_cords = [
-            (13, 87), (435, 87), (857, 87),
-            (13, 372), (435, 372), (857, 372)]
+            (13, 90), (435, 90), (857, 90),
+            (13, 375), (435, 375), (857, 375)]
         self.esc_rect = pygame.Rect((1205, 25), (50, 50))
         self.is_open = True
         self.choosen_area_number = None
@@ -36,8 +38,8 @@ class LoadMenu:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            mouse_pos = pygame.mouse.get_pos()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
                 if self.esc_rect.collidepoint(mouse_pos):
                     self.is_open = False
                 for number, rect in self.buttons_rects:
@@ -46,9 +48,16 @@ class LoadMenu:
                         self.is_open = False
 
     def draw(self):
+        mouse_pos = pygame.mouse.get_pos()
         self.screen.blit(self.background_image, (0, 0))
         for number, surface in enumerate(self.surfaces):
             self.screen.blit(surface, self.buttons_cords[number])
+        for number, rect in self.buttons_rects:
+            if rect.collidepoint(mouse_pos):
+                self.screen.blit(self.selected_button_image,
+                                 (self.buttons_cords[number - 1][0] - 5,
+                                     self.buttons_cords[number - 1][1] - 6))
+                pygame.display.update()
         pygame.display.update()
 
     def load_images(self):

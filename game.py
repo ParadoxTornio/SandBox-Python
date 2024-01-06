@@ -240,6 +240,8 @@ class Game:
         self.space.add(self.segment_left_wall)
         self.space.add(self.segment_right_wall)
 
+# TODO: сделать проверку перед тем как сохранять что-то по нажатию кнопки
+
     def events(self):
 
         for sprite_1 in self.elements_group:
