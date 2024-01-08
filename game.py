@@ -26,85 +26,26 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
-
         pygame_util.positive_y_is_up = False
-        self.space = Space()
-        self.space.gravity = GRAVITY
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
-        self.background = pygame.image.load('images/background_2.png')
+        self.space_init()
+        self.images_init()
+        self.eraser_init()
+        self.save_and_load_init()
         self.table_rect = pygame.rect.Rect(0, 82, 1280, 424)
-        self.screen.blit(self.background, (0, 0))
-
-        self.clear_picture = pygame.image.load('images/musorka.png')
         self.clear_image = pygame.Surface((50, 50))
         self.clear_rect = self.clear_image.get_rect()
         self.clear_rect.x = 25
         self.clear_rect.y = 25
-
-        self.eraser_picture = pygame.image.load('images/eraser_button.png')
-        self.eraser_image = pygame.Surface((50, 50))
-        self.eraser_rect = self.eraser_image.get_rect()
-        self.eraser_rect.x = 100
-        self.eraser_rect.y = 25
-
-        self.selected_button_picture = pygame.image.load(
-            'images/selected button.png').convert_alpha()
-
-        self.unselected_button_picture = pygame.image.load(
-            'images/unselected button.png').convert_alpha()
-
-        self.small_eraser_surface = pygame.Surface((8, 8), pygame.SRCALPHA)
-        self.small_eraser_surface.fill((255, 255, 255, 128))
-
-        self.medium_eraser_surface = pygame.Surface((16, 16), pygame.SRCALPHA)
-        self.medium_eraser_surface.fill((255, 255, 255, 128))
-
-        self.large_eraser_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
-        self.large_eraser_surface.fill((255, 255, 255, 128))
-
         self.menu = Menu(self.screen, self.space)
-
-        self.eraser_menu = Eraser_menu(self.screen)
-
         self.select_area_menu = SelectAreaMenu(self.screen)
-
-        self.load_all_button = LoadAllButton(
-            'images/diskette_load.png', (1130, 25), '')
-
-        self.save_all_button = SaveAllButton(
-            'images/diskette_save.png', (1055, 25), '')
-        self.cursor_image = pygame.image.load('images/cross.png')
-
         self.running = True
         self.selected_element = None
         self.elements_group = pygame.sprite.Group()
-        self.save_and_load_buttons_group = pygame.sprite.Group()
         self.options = pygame_util.DrawOptions(self.screen)
         self.draw_options = False
-
-        self.segment_floor = Segment(
-            self.space.static_body, (1, HEIGHT - 136), (WIDTH, HEIGHT - 136),
-            11)
-
-        self.segment_left_wall = Segment(
-            self.space.static_body, (1, 0), (1, HEIGHT), 10)
-
-        self.segment_right_wall = Segment(
-            self.space.static_body, (WIDTH - 11, 0), (WIDTH - 11, HEIGHT), 10)
-
-        self.segment_floor.friction = 1
-
-        self.space.add(self.segment_floor)
-        self.space.add(self.segment_left_wall)
-        self.space.add(self.segment_right_wall)
-
-        self.save_and_load_buttons_group.add(self.save_all_button)
-        self.save_and_load_buttons_group.add(self.load_all_button)
-
-        self.save_point1 = None
-        self.save_point2 = None
-        self.is_save_mode = False
+        self.clear_screen()
 
     def new(self):
         self.run()
@@ -115,6 +56,75 @@ class Game:
             self.update()
             self.events()
             self.draw()
+
+    def space_init(self):
+        self.space = Space()
+        self.space.gravity = GRAVITY
+
+        self.segment_floor = Segment(
+            self.space.static_body, (1, HEIGHT - 136), (WIDTH, HEIGHT - 136),
+            11)
+
+        self.segment_up = Segment(
+            self.space.static_body, (1, 70), (WIDTH, 70),
+            11)
+
+        self.segment_left_wall = Segment(
+            self.space.static_body, (-11, 0), (-11, HEIGHT), 10)
+
+        self.segment_right_wall = Segment(
+            self.space.static_body, (WIDTH + 10, 0), (WIDTH + 10, HEIGHT), 10)
+
+        self.segment_floor.friction = 0.9
+
+        self.space.add(self.segment_floor)
+        self.space.add(self.segment_left_wall)
+        self.space.add(self.segment_right_wall)
+        self.space.add(self.segment_up)
+
+    def save_and_load_init(self):
+        self.save_and_load_buttons_group = pygame.sprite.Group()
+        self.load_all_button = LoadAllButton(
+            'images/diskette_load.png', (1130, 25), '')
+
+        self.save_all_button = SaveAllButton(
+            'images/diskette_save.png', (1055, 25), '')
+        self.cursor_image = pygame.image.load('images/cross.png')
+
+        self.save_and_load_buttons_group.add(self.save_all_button)
+        self.save_and_load_buttons_group.add(self.load_all_button)
+
+        self.save_point1 = None
+        self.save_point2 = None
+        self.is_save_mode = False
+
+    def eraser_init(self):
+        self.eraser_image = pygame.Surface((50, 50))
+        self.eraser_rect = self.eraser_image.get_rect()
+        self.eraser_rect.x = 100
+        self.eraser_rect.y = 25
+
+        self.small_eraser_surface = pygame.Surface((8, 8), pygame.SRCALPHA)
+        self.small_eraser_surface.fill((255, 255, 255, 128))
+
+        self.medium_eraser_surface = pygame.Surface((16, 16), pygame.SRCALPHA)
+        self.medium_eraser_surface.fill((255, 255, 255, 128))
+
+        self.large_eraser_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
+        self.large_eraser_surface.fill((255, 255, 255, 128))
+
+        self.eraser_menu = Eraser_menu(self.screen)
+
+    def images_init(self):
+        self.background = pygame.image.load('images/background_2.png')
+        self.clear_picture = pygame.image.load('images/musorka.png')
+        self.eraser_picture = pygame.image.load('images/eraser_button.png')
+
+        self.selected_button_picture = pygame.image.load(
+            'images/selected button.png').convert_alpha()
+
+        self.unselected_button_picture = pygame.image.load(
+            'images/unselected button.png').convert_alpha()
 
     def update(self):
         pygame.display.set_caption(
@@ -237,19 +247,89 @@ class Game:
         for i in self.space.shapes:
             self.space.remove(i)
         self.space.add(self.segment_floor)
+        self.space.add(self.segment_up)
         self.space.add(self.segment_left_wall)
         self.space.add(self.segment_right_wall)
 
-# TODO: сделать проверку перед тем как сохранять что-то по нажатию кнопки
-
-    def events(self):
-
+    def check_sprites_sollisions(self):
         for sprite_1 in self.elements_group:
             collision = pygame.sprite.spritecollide(
                 sprite_1, self.elements_group, False, custom_collision)
 
             for sprite_2 in collision:
                 sprite_1.interaction(sprite_2)
+
+    def table_clicks(self, mouse_event, mouse_pos):
+        if mouse_event[0]:
+            if self.selected_element != 'eraser':
+                self.add_element()
+            else:
+                if self.eraser_menu.selected_button == \
+                        self.eraser_menu.button_8x8:
+                    self.erase_element(mouse_pos)
+
+                elif self.eraser_menu.selected_button == \
+                        self.eraser_menu.button_16x16:
+                    for x in range(mouse_pos[0] - 8,
+                                   mouse_pos[0] + 9, 8):
+                        for y in range(mouse_pos[1] - 8,
+                                       mouse_pos[1] + 9, 8):
+                            self.erase_element((x, y))
+
+                else:
+                    for x in range(mouse_pos[0] - 16,
+                                   mouse_pos[0] + 17, 8):
+                        for y in range(mouse_pos[1] - 16,
+                                       mouse_pos[1] + 17, 8):
+                            self.erase_element((x, y))
+
+        elif mouse_event[2]:
+            self.selected_element = None
+            self.menu.unselect_button()
+            self.eraser_menu.is_open = False
+            self.select_area_menu.unselect_button()
+            self.is_save_mode = False
+            pygame.mouse.set_visible(True)
+
+    def mouse_button_down(self, event, mouse_pos):
+        if self.is_save_mode and event.button == 1:
+            if self.table_rect.collidepoint(mouse_pos):
+                self.save_point1 = mouse_pos
+            else:
+                self.save_point1 = None
+            self.save_point2 = None
+
+        if event.button == 1 and \
+                self.clear_rect.collidepoint(mouse_pos):
+            self.clear_screen()
+
+        if event.button == 1 and \
+                self.eraser_rect.collidepoint(mouse_pos):
+            self.selected_element = 'eraser'
+            self.menu.unselect_button()
+            self.eraser_menu.is_open = True
+            self.select_area_menu.unselect_button()
+            self.is_save_mode = False
+            pygame.mouse.set_visible(True)
+
+    def keydown(self, event):
+        if self.save_point2:
+            if event.key == pygame.K_1:
+                self.save_area('1')
+            elif event.key == pygame.K_2:
+                self.save_area('2')
+            elif event.key == pygame.K_3:
+                self.save_area('3')
+            elif event.key == pygame.K_4:
+                self.save_area('4')
+            elif event.key == pygame.K_5:
+                self.save_area('5')
+            elif event.key == pygame.K_6:
+                self.save_area('6')
+            elif event.key == pygame.K_0:
+                self.save_area('0')
+
+    def events(self):
 
         for event in pygame.event.get():
             mouse_event = pygame.mouse.get_pressed()
@@ -277,57 +357,10 @@ class Game:
             elif (mouse_event[0] or mouse_event[2]) and \
                     self.selected_element and \
                     self.table_rect.collidepoint(mouse_pos):
-                if mouse_event[0]:
-                    if self.selected_element != 'eraser':
-                        self.add_element()
-                    else:
-                        if self.eraser_menu.selected_button == \
-                                self.eraser_menu.button_8x8:
-                            self.erase_element(mouse_pos)
-
-                        elif self.eraser_menu.selected_button == \
-                                self.eraser_menu.button_16x16:
-                            for x in range(mouse_pos[0] - 8,
-                                           mouse_pos[0] + 9, 8):
-                                for y in range(mouse_pos[1] - 8,
-                                               mouse_pos[1] + 9, 8):
-                                    self.erase_element((x, y))
-
-                        else:
-                            for x in range(mouse_pos[0] - 16,
-                                           mouse_pos[0] + 17, 8):
-                                for y in range(mouse_pos[1] - 16,
-                                               mouse_pos[1] + 17, 8):
-                                    self.erase_element((x, y))
-
-                elif mouse_event[2]:
-                    self.selected_element = None
-                    self.menu.unselect_button()
-                    self.eraser_menu.is_open = False
-                    self.select_area_menu.unselect_button()
-                    self.is_save_mode = False
-                    pygame.mouse.set_visible(True)
+                self.table_clicks(mouse_event, mouse_pos)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-
-                if self.is_save_mode and event.button == 1:
-                    if self.table_rect.collidepoint(mouse_pos):
-                        self.save_point1 = mouse_pos
-                    else:
-                        self.save_point1 = None
-                    self.save_point2 = None
-                if event.button == 1 and \
-                        self.clear_rect.collidepoint(mouse_pos):
-                    self.clear_screen()
-
-                if event.button == 1 and \
-                        self.eraser_rect.collidepoint(mouse_pos):
-                    self.selected_element = 'eraser'
-                    self.menu.unselect_button()
-                    self.eraser_menu.is_open = True
-                    self.select_area_menu.unselect_button()
-                    self.is_save_mode = False
-                    pygame.mouse.set_visible(True)
+                self.mouse_button_down(event, mouse_pos)
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.is_save_mode and event.button == 1:
@@ -335,21 +368,10 @@ class Game:
                         self.save_point2 = mouse_pos
                     else:
                         self.save_point1 = None
+
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1 and self.is_save_mode:
-                    self.save_area('1')
-                elif event.key == pygame.K_2 and self.is_save_mode:
-                    self.save_area('2')
-                elif event.key == pygame.K_3 and self.is_save_mode:
-                    self.save_area('3')
-                elif event.key == pygame.K_4 and self.is_save_mode:
-                    self.save_area('4')
-                elif event.key == pygame.K_5 and self.is_save_mode:
-                    self.save_area('5')
-                elif event.key == pygame.K_6 and self.is_save_mode:
-                    self.save_area('6')
-                elif event.key == pygame.K_0 and self.is_save_mode:
-                    self.save_area('0')
+                self.keydown(event)
+                self.draw_hitboxes()
 
             if event.type == LOAD_GAME:
                 self.load_game(event.message)
@@ -360,7 +382,7 @@ class Game:
             self.select_area_menu.handle_events(event)
             self.eraser_menu.handle_events(event)
 
-    def draw_options(self):
+    def draw_hitboxes(self):
         key = pygame.key.get_pressed()
 
         if key[pygame.K_d]:
@@ -369,9 +391,41 @@ class Game:
         elif key[pygame.K_s]:
             self.draw_options = False
 
-        if self.draw_options:
-            self.space.debug_draw(self.options)
-            pygame.display.flip()
+    def eraser_draw(self, mouse_pos):
+        self.eraser_menu.draw()
+        if self.eraser_menu.selected_button == self.eraser_menu.button_8x8:
+            self.screen.blit(self.small_eraser_surface,
+                             (mouse_pos[0] - 4, mouse_pos[1] - 4))
+        elif self.eraser_menu.selected_button ==\
+                self.eraser_menu.button_16x16:
+            self.screen.blit(self.medium_eraser_surface,
+                             (mouse_pos[0] - 8, mouse_pos[1] - 8))
+        else:
+            self.screen.blit(self.large_eraser_surface,
+                             (mouse_pos[0] - 16, mouse_pos[1] - 16))
+
+    def save_mode_draw(self, mouse_pos):
+        self.screen.blit(self.cursor_image,
+                         (mouse_pos[0] - 12, mouse_pos[1] - 12))
+        if self.save_point1:
+            if self.save_point2:
+                min_x = min(self.save_point1[0], self.save_point2[0])
+                min_y = min(self.save_point1[1], self.save_point2[1])
+                max_x = max(self.save_point1[0], self.save_point2[0])
+                max_y = max(self.save_point1[1], self.save_point2[1])
+                selected_surface = pygame.Surface(
+                    (max_x - min_x, max_y - min_y), pygame.SRCALPHA)
+                selected_surface.fill((255, 255, 255, 128))
+                self.screen.blit(selected_surface, (min_x, min_y))
+            else:
+                min_x = min(self.save_point1[0], mouse_pos[0])
+                min_y = min(self.save_point1[1], mouse_pos[1])
+                max_x = max(self.save_point1[0], mouse_pos[0])
+                max_y = max(self.save_point1[1], mouse_pos[1])
+                selected_surface = pygame.Surface(
+                    (max_x - min_x, max_y - min_y), pygame.SRCALPHA)
+                selected_surface.fill((255, 255, 255, 128))
+                self.screen.blit(selected_surface, (min_x, min_y))
 
     def draw(self):
         self.screen.blit(self.background, (0, 0))
@@ -384,41 +438,15 @@ class Game:
         self.save_and_load_buttons_group.draw(self.screen)
         self.select_area_menu.draw()
 
+        if self.draw_options:
+            self.space.debug_draw(self.options)
+            pygame.display.flip()
+
         if self.is_save_mode:
-            self.screen.blit(self.cursor_image,
-                             (mouse_pos[0] - 12, mouse_pos[1] - 12))
-            if self.save_point1:
-                if self.save_point2:
-                    min_x = min(self.save_point1[0], self.save_point2[0])
-                    min_y = min(self.save_point1[1], self.save_point2[1])
-                    max_x = max(self.save_point1[0], self.save_point2[0])
-                    max_y = max(self.save_point1[1], self.save_point2[1])
-                    selected_surface = pygame.Surface(
-                        (max_x - min_x, max_y - min_y), pygame.SRCALPHA)
-                    selected_surface.fill((255, 255, 255, 128))
-                    self.screen.blit(selected_surface, (min_x, min_y))
-                else:
-                    min_x = min(self.save_point1[0], mouse_pos[0])
-                    min_y = min(self.save_point1[1], mouse_pos[1])
-                    max_x = max(self.save_point1[0], mouse_pos[0])
-                    max_y = max(self.save_point1[1], mouse_pos[1])
-                    selected_surface = pygame.Surface(
-                        (max_x - min_x, max_y - min_y), pygame.SRCALPHA)
-                    selected_surface.fill((255, 255, 255, 128))
-                    self.screen.blit(selected_surface, (min_x, min_y))
+            self.save_mode_draw(mouse_pos)
 
         if self.selected_element == 'eraser':
-            self.eraser_menu.draw()
-            if self.eraser_menu.selected_button == self.eraser_menu.button_8x8:
-                self.screen.blit(self.small_eraser_surface,
-                                 (mouse_pos[0] - 4, mouse_pos[1] - 4))
-            elif self.eraser_menu.selected_button ==\
-                    self.eraser_menu.button_16x16:
-                self.screen.blit(self.medium_eraser_surface,
-                                 (mouse_pos[0] - 8, mouse_pos[1] - 8))
-            else:
-                self.screen.blit(self.large_eraser_surface,
-                                 (mouse_pos[0] - 16, mouse_pos[1] - 16))
+            self.eraser_draw(mouse_pos)
 
         pygame.display.flip()
 

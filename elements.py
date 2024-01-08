@@ -156,8 +156,9 @@ class LiquidElement(Element):
         self.water_shape.friction = 0
         # TODO переделать песок
         if name == 'песок':
-            self.water_shape.friction = 10
-            self.water_shape.body.moment = 10000
+            self.water_shape.friction = 0.9
+            self.water_shape.body.moment = 100000
+            self.water_shape.body.mass = 10000
         space.add(water_body, self.water_shape)
 
     def update(self):
