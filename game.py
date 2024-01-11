@@ -251,7 +251,7 @@ class Game:
         self.space.add(self.segment_left_wall)
         self.space.add(self.segment_right_wall)
 
-    def check_sprites_sollisions(self):
+    def check_sprites_collisions(self):
         for sprite_1 in self.elements_group:
             collision = pygame.sprite.spritecollide(
                 sprite_1, self.elements_group, False, custom_collision)
@@ -330,7 +330,7 @@ class Game:
                 self.save_area('0')
 
     def events(self):
-
+        self.check_sprites_collisions()
         for event in pygame.event.get():
             mouse_event = pygame.mouse.get_pressed()
             mouse_pos = pygame.mouse.get_pos()

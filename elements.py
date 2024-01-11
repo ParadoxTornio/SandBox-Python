@@ -184,9 +184,6 @@ class LiquidElement(Element):
         pass
 
 
-# TODO  цепная реакция для C-4 и сделать сегменты
-
-
 class ExplodingElement(Element):
     def __init__(self, name, image_path, pos, explosion_power, space):
         super().__init__(name, image_path, pos)
@@ -194,6 +191,12 @@ class ExplodingElement(Element):
         self.space = space
         self.is_killed = False
         self.is_blown_up = False
+        self.time_after_exp = None
+        self.explosion_images = []
+        self.anim_number = None
+        for i in range(1, 10):
+            self.explosion_images.append(
+                pygame.image.load(f'images/Explosion/Explosion{i}.png'))
 
     def __copy__(self):
         new_instance = self.__class__(
@@ -201,14 +204,32 @@ class ExplodingElement(Element):
             self.explosion_power, self.space)
         return new_instance
 
+    def update(self):
+        if self.time_after_exp:
+            if time.perf_counter() - self.time_after_exp >= 0.5:
+                self.kill()
+                self.time_after_exp = None
+            elif time.perf_counter() - \
+                    self.time_after_exp >= 0.06 * (self.anim_number + 1):
+                print(f"{time.perf_counter() - self.time_after_exp}s\n")
+                self.anim_number += 1
+                self.image = pygame.Surface(
+                    (self.rect.width, self.rect.height), pygame.SRCALPHA)
+                self.image.blit(
+                    self.explosion_images[self.anim_number], (0, 0))
+
     def explode(self):
         center = self.rect.center
-        self.rect.width = self.explosion_power * 12.5
-        self.rect.height = self.explosion_power * 12.5
+        self.rect.width = 192
+        self.rect.height = 192
         self.rect.center = center
         self.image = pygame.Surface((self.rect.width, self.rect.height),
                                     pygame.SRCALPHA)
-        self.image.fill((255, 255, 255, 128))
+        self.image.blit(self.explosion_images[0], (0, 0))
+        self.time_after_exp = time.perf_counter()
+        print(time.perf_counter())
+        self.anim_number = 0
+        # self.image.fill((255, 255, 255, 128))
 
     def kill(self):
         if not self.is_killed:
@@ -230,36 +251,36 @@ class ExplodingElement(Element):
     def interaction(self, sprite_2):
         if self.groups() == sprite_2.groups() and \
                 self.name == sprite_2.name:
-            sprite_2.kill()
-        elif isinstance(sprite_2, FireElement):
-            self.explode()
-            self.is_blown_up = True
-        elif isinstance(sprite_2, ExplodingElement):
+            if not self.is_blown_up and not sprite_2.is_blown_up:
+                sprite_2.kill()
+        if isinstance(sprite_2, FireElement):
+            if not self.is_blown_up:
+                self.explode()
+                self.is_blown_up = True
+        if isinstance(sprite_2, ExplodingElement):
             if self.is_blown_up:
                 if not sprite_2.is_blown_up:
                     sprite_2.explode()
                     sprite_2.is_blown_up = True
-        elif isinstance(sprite_2, SolidElement):
+        if isinstance(sprite_2, SolidElement):
             if self.explosion_power >= sprite_2.solidity:
                 sprite_2.kill()
                 self.kill()
-        elif isinstance(sprite_2, WoodElement):
+        if isinstance(sprite_2, WoodElement):
             if self.explosion_power > sprite_2.solidity:
                 self.kill()
                 sprite_2.kill()
-        elif isinstance(sprite_2, GlassElement):
+        if isinstance(sprite_2, GlassElement):
             if self.explosion_power >= sprite_2.solidity:
                 self.kill()
                 sprite_2.kill()
-        elif isinstance(sprite_2, LiquidElement):
+        if isinstance(sprite_2, LiquidElement):
             if sprite_2.ph > 0:
                 try:
                     self.groups()[0].add(SteamElement('пар', 'images/пар.png', [self.rect.x, self.rect.y]))  # noqa
                 except IndexError or AssertionError:
                     pass
                 self.kill()
-        else:
-            self.kill()
 
 
 class WoodElement(Element):
@@ -378,8 +399,6 @@ class LavaElement(Element):
             super().kill()
             self.is_killed = True
 
-    # TODO: исправить спавн камня после того как лава коснулась с водой
-
     def interaction(self, sprite_2):
         if isinstance(sprite_2, LiquidElement):
             try:
@@ -405,13 +424,15 @@ class LavaElement(Element):
                                                    'images/stone_frame.png',
                                                    [0, 0], 15, 5, 1000, False,
                                                    self.space)
+                cords[0] = cords[0] // BLOCK_SIZE * BLOCK_SIZE
+                cords[1] = cords[1] // BLOCK_SIZE * BLOCK_SIZE
                 self.solid_element1.change_position(cords)
                 self.solid_element2.change_position(
                     (cords[0] + 8, cords[1]))
                 self.solid_element3.change_position(
-                    (cords[0], cords[1] - 8))
+                    (cords[0], cords[1] + 8))
                 self.solid_element4.change_position(
-                    (cords[0] + 8, cords[1] - 8))
+                    (cords[0] + 8, cords[1] + 8))
                 self.groups()[0].add(self.steam_element)
                 self.groups()[0].add(self.solid_element1)
                 self.groups()[0].add(self.solid_element2)
