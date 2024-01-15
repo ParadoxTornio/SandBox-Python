@@ -211,7 +211,6 @@ class ExplodingElement(Element):
                 self.time_after_exp = None
             elif time.perf_counter() - \
                     self.time_after_exp >= 0.06 * (self.anim_number + 1):
-                print(f"{time.perf_counter() - self.time_after_exp}s\n")
                 self.anim_number += 1
                 self.image = pygame.Surface(
                     (self.rect.width, self.rect.height), pygame.SRCALPHA)
@@ -227,7 +226,6 @@ class ExplodingElement(Element):
                                     pygame.SRCALPHA)
         self.image.blit(self.explosion_images[0], (0, 0))
         self.time_after_exp = time.perf_counter()
-        print(time.perf_counter())
         self.anim_number = 0
         # self.image.fill((255, 255, 255, 128))
 

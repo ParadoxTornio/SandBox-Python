@@ -97,6 +97,7 @@ class Game:
         self.save_point1 = None
         self.save_point2 = None
         self.is_save_mode = False
+        self.is_load_mode = False
 
     def eraser_init(self):
         self.eraser_image = pygame.Surface((50, 50))
@@ -182,8 +183,76 @@ class Game:
         self.is_save_mode = False
         pygame.mouse.set_visible(True)
         load_menu = LoadMenu(self.screen)
-        if load_menu.choosen_area_number:
-            print(load_menu.choosen_area_number)
+        choosen_area_number = load_menu.choosen_area_number
+        if choosen_area_number:
+            self.is_load_mode = True
+            with open(
+                    f'saves/{choosen_area_number}_area.save', 'rb') as file:
+                self.loaded_area = pickle.load(file)
+            self.area_image = pygame.image.load(
+                f'images/saved_screenshots/{choosen_area_number}.png')
+            self.area_surface = pygame.Surface(self.area_image.get_size())
+            self.area_surface.set_alpha(128)
+            self.area_surface.blit(self.area_image, (0, 0))
+
+    def load_area_click(self, mouse_pos):
+        center_pos = self.loaded_area[0]
+        for coords, name in self.loaded_area[1:]:
+            new_object = None
+            dx = coords[0] - center_pos[0]
+            dy = coords[1] - center_pos[1]
+            if name == 'вода':
+                new_object = LiquidElement('вода', 'images/water_frame.png',
+                                           [0, 0], 0, 10, 100, self.space)
+            elif name == 'огонь':
+                new_object = FireElement(
+                    'огонь', 'images/fire_frame.png', [0, 0], 1000)
+            elif name == 'металл':
+                new_object = SolidElement('металл', 'images/metal_frame.png',
+                                          [0, 0], 10, 5, 500, True, self.space)
+            elif name == 'C-4':
+                new_object = ExplodingElement('C-4', 'images/C4_frame.png',
+                                              [0, 0], 15, self.space)
+            elif name == 'металл+':
+                new_object = SolidElement('металл+',
+                                          'images/metal_plus_frame.png',
+                                          [0, 0], 50, 5, 1250, True,
+                                          self.space)
+            elif name == 'лава':
+                new_object = LavaElement('лава', 'images/lava_frame.png',
+                                         [0, 0], 1200, self.space)
+            elif name == 'кислота':
+                new_object = LiquidElement('кислота',
+                                           'images/poison_frame.png',
+                                           [0, 0], 30, 15, 350, self.space)
+            elif name == 'кирпичи':
+                new_object = SolidElement('кирпичи', 'images/bricks_frame.png',
+                                          [0, 0], 10, 10, 1000, False,
+                                          self.space)
+            elif name == 'бетон':
+                new_object = SolidElement('бетон', 'images/concrete_frame.png',
+                                          [0, 0], 25, 7, 1000, False,
+                                          self.space)
+            elif name == 'песок':
+                new_object = LiquidElement('песок', 'images/sand_frame.png',
+                                           [0, 0], 0, 10, 100000, self.space)
+            elif name == 'дуб':
+                new_object = WoodElement('дуб', 'images/oak_frame.png',
+                                         [0, 0], 5, 900, self.space)
+            elif name == 'стекло':
+                new_object = GlassElement('стекло', 'images/glass_frame.png',
+                                          [0, 0], 5, 550, self.space)
+            elif name == 'камень':
+                new_object = SolidElement('камень', 'images/stone_frame.png',
+                                          [0, 0], 15, 5, 1000, False,
+                                          self.space)
+            elif name == 'пар':
+                new_object = SteamElement(
+                    'пар', 'images/пар.png',
+                    (mouse_pos[0] + dx, mouse_pos[1] + dy))
+            new_object.change_position((mouse_pos[0] + dx, mouse_pos[1] + dy))
+            self.elements_group.add(new_object)
+        self.is_load_mode = False
 
     def load_game(self, data):
         self.clear_screen()
@@ -303,6 +372,10 @@ class Game:
                 self.clear_rect.collidepoint(mouse_pos):
             self.clear_screen()
 
+        if self.is_load_mode and event.button == 1:
+            if self.table_rect.collidepoint(mouse_pos):
+                self.load_area_click(mouse_pos)
+
         if event.button == 1 and \
                 self.eraser_rect.collidepoint(mouse_pos):
             self.selected_element = 'eraser'
@@ -347,8 +420,9 @@ class Game:
                     pygame.mouse.set_visible(True)
 
             elif event.type == LOAD_AREA:
-                self.load_area()
                 self.menu.unselect_button()
+                self.select_area_menu.unselect_button()
+                self.load_area()
             elif event.type == SAVE_AREA:
                 self.select_area()
                 self.selected_element = None
@@ -427,6 +501,12 @@ class Game:
                 selected_surface.fill((255, 255, 255, 128))
                 self.screen.blit(selected_surface, (min_x, min_y))
 
+    def load_mode_draw(self, mouse_pos):
+        if self.table_rect.collidepoint(mouse_pos):
+            x = mouse_pos[0] - self.area_image.get_width() // 2
+            y = mouse_pos[1] - self.area_image.get_height() // 2
+            self.screen.blit(self.area_surface, (x, y))
+
     def draw(self):
         self.screen.blit(self.background, (0, 0))
         self.elements_group.draw(self.screen)
@@ -444,6 +524,9 @@ class Game:
 
         if self.is_save_mode:
             self.save_mode_draw(mouse_pos)
+
+        if self.is_load_mode:
+            self.load_mode_draw(mouse_pos)
 
         if self.selected_element == 'eraser':
             self.eraser_draw(mouse_pos)

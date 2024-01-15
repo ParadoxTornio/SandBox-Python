@@ -13,17 +13,18 @@ class Menu:
         self.elements_button = MenuButton(
             'images/button_0.png', (1205, 25), '', self)
         self.background_image = pygame.image.load('images/background.png')
+        self.elements_buttons_group = pygame.sprite.Group()
         self.menu_buttons_group = pygame.sprite.Group()
-        self.menu_buttons_group.add(self.elements_button)  # noqa
+        self.menu_buttons_group.add(self.elements_button)
         self.selected_button = None
         self.draw()
         self.create_buttons()
 
     def show_menu(self):
-        self.menu_buttons_group.draw(self.screen)
+        self.elements_buttons_group.draw(self.screen)
 
     def hide_menu(self):
-        self.menu_buttons_group.clear(self.screen, self.background_image)
+        self.elements_buttons_group.clear(self.screen, self.background_image)
 
     def unselect_button(self):
         if self.selected_button:
@@ -82,26 +83,28 @@ class Menu:
             'images/stone.png', (850, 525), 'камень',
             SolidElement('камень', 'images/stone_frame.png',
                          [0, 0], 15, 5, 1000, False, self.space))
-        self.menu_buttons_group.add(water_button)  # noqa
-        self.menu_buttons_group.add(fire_button)  # noqa
-        self.menu_buttons_group.add(metal_button)  # noqa
-        self.menu_buttons_group.add(buf_metal_button)  # noqa
-        self.menu_buttons_group.add(concrete_button)  # noqa
-        self.menu_buttons_group.add(glass_button)  # noqa
-        self.menu_buttons_group.add(bricks_button)  # noqa
-        self.menu_buttons_group.add(sand_button)  # noqa
-        self.menu_buttons_group.add(lava_button)  # noqa
-        self.menu_buttons_group.add(poison_button)  # noqa
-        self.menu_buttons_group.add(stone_button)  # noqa
-        self.menu_buttons_group.add(c4_button)  # noqa
-        self.menu_buttons_group.add(oak_button)  # noqa
+        self.elements_buttons_group.add(water_button)  # noqa
+        self.elements_buttons_group.add(fire_button)  # noqa
+        self.elements_buttons_group.add(metal_button)  # noqa
+        self.elements_buttons_group.add(buf_metal_button)  # noqa
+        self.elements_buttons_group.add(concrete_button)  # noqa
+        self.elements_buttons_group.add(glass_button)  # noqa
+        self.elements_buttons_group.add(bricks_button)  # noqa
+        self.elements_buttons_group.add(sand_button)  # noqa
+        self.elements_buttons_group.add(lava_button)  # noqa
+        self.elements_buttons_group.add(poison_button)  # noqa
+        self.elements_buttons_group.add(stone_button)  # noqa
+        self.elements_buttons_group.add(c4_button)  # noqa
+        self.elements_buttons_group.add(oak_button)  # noqa
 
     def draw(self):
+        self.menu_buttons_group.draw(self.screen)
         if self.elements_button.is_open:
-            self.menu_buttons_group.draw(self.screen)
+            self.elements_buttons_group.draw(self.screen)
 
     def handle_events(self, event):
-        for button in self.menu_buttons_group:
+        self.elements_button.update(event)
+        for button in self.elements_buttons_group:
             # button.update(event)
             if button.update(event) and self.selected_button != button:
                 if self.selected_button:

@@ -52,11 +52,14 @@ class MenuButton(Button):
         self.menu_object = menu_object
         self.image = pygame.Surface((50, 50))
         self.esc_picture = pygame.image.load('images/esc_button.png')
+        self.elements_picture = pygame.image.load('images/button_0.png')
         self.is_open = False
+        self.image.blit(self.elements_picture, (0, 0))
 
     def click_action(self):
         if self.is_open:
             self.is_open = False
+            self.image.blit(self.elements_picture, (0, 0))
             self.menu_object.hide_menu()
         else:
             self.is_open = True
