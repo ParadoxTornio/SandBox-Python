@@ -138,6 +138,58 @@ class Game:
             if sprite.rect.collidepoint(mouse_pos):
                 sprite.kill()
 
+    def create_object(self, name, mouse_pos, dx, dy):
+        if name == 'вода':
+            new_object = LiquidElement('вода', 'images/water_frame.png',
+                                       [0, 0], 0, 10, 100, self.space)
+        elif name == 'огонь':
+            new_object = FireElement(
+                'огонь', 'images/fire_frame.png', [0, 0], 1000)
+        elif name == 'металл':
+            new_object = SolidElement('металл', 'images/metal_frame.png',
+                                      [0, 0], 10, 5, 500, True, self.space)
+        elif name == 'C-4':
+            new_object = ExplodingElement('C-4', 'images/C4_frame.png',
+                                          [0, 0], 15, self.space)
+        elif name == 'металл+':
+            new_object = SolidElement('металл+',
+                                      'images/metal_plus_frame.png',
+                                      [0, 0], 50, 5, 1250, True,
+                                      self.space)
+        elif name == 'лава':
+            new_object = LavaElement('лава', 'images/lava_frame.png',
+                                     [0, 0], 1200, self.space)
+        elif name == 'кислота':
+            new_object = LiquidElement('кислота',
+                                       'images/poison_frame.png',
+                                       [0, 0], 30, 15, 350, self.space)
+        elif name == 'кирпичи':
+            new_object = SolidElement('кирпичи', 'images/bricks_frame.png',
+                                      [0, 0], 10, 10, 1000, False,
+                                      self.space)
+        elif name == 'бетон':
+            new_object = SolidElement('бетон', 'images/concrete_frame.png',
+                                      [0, 0], 25, 7, 1000, False,
+                                      self.space)
+        elif name == 'песок':
+            new_object = LiquidElement('песок', 'images/sand_frame.png',
+                                       [0, 0], 0, 10, 100000, self.space)
+        elif name == 'дуб':
+            new_object = WoodElement('дуб', 'images/oak_frame.png',
+                                     [0, 0], 5, 900, self.space)
+        elif name == 'стекло':
+            new_object = GlassElement('стекло', 'images/glass_frame.png',
+                                      [0, 0], 5, 550, self.space)
+        elif name == 'камень':
+            new_object = SolidElement('камень', 'images/stone_frame.png',
+                                      [0, 0], 15, 5, 1000, False,
+                                      self.space)
+        elif name == 'пар':
+            new_object = SteamElement(
+                'пар', 'images/пар.png',
+                (mouse_pos[0] + dx, mouse_pos[1] + dy))
+        return new_object
+
     def save_area(self, number_of_file):
         min_x = min(self.save_point1[0], self.save_point2[0])
         min_x = min_x // BLOCK_SIZE * BLOCK_SIZE
@@ -197,6 +249,18 @@ class Game:
 
     def load_area_click(self, mouse_pos):
         center_pos = self.loaded_area[0]
+        if len(self.loaded_area) == 1:
+            for element in self.elements_group:
+                if element.rect.x >= mouse_pos[0] - \
+                    (self.area_image.get_width() // 2) and \
+                        element.rect.x <= mouse_pos[0] + \
+                    (self.area_image.get_width() // 2) and \
+                        element.rect.y <= mouse_pos[1] + \
+                    (self.area_image.get_height() // 2) and \
+                        element.rect.y >= mouse_pos[1] - \
+                        (self.area_image.get_height() // 2):
+                    element.kill()
+
         for coords, name in self.loaded_area[1:]:
             new_object = None
             dx = coords[0] - center_pos[0]
@@ -204,55 +268,7 @@ class Game:
             if not self.table_rect.collidepoint(
                     (mouse_pos[0] + dx, mouse_pos[1] + dy)):
                 continue
-            if name == 'вода':
-                new_object = LiquidElement('вода', 'images/water_frame.png',
-                                           [0, 0], 0, 10, 100, self.space)
-            elif name == 'огонь':
-                new_object = FireElement(
-                    'огонь', 'images/fire_frame.png', [0, 0], 1000)
-            elif name == 'металл':
-                new_object = SolidElement('металл', 'images/metal_frame.png',
-                                          [0, 0], 10, 5, 500, True, self.space)
-            elif name == 'C-4':
-                new_object = ExplodingElement('C-4', 'images/C4_frame.png',
-                                              [0, 0], 15, self.space)
-            elif name == 'металл+':
-                new_object = SolidElement('металл+',
-                                          'images/metal_plus_frame.png',
-                                          [0, 0], 50, 5, 1250, True,
-                                          self.space)
-            elif name == 'лава':
-                new_object = LavaElement('лава', 'images/lava_frame.png',
-                                         [0, 0], 1200, self.space)
-            elif name == 'кислота':
-                new_object = LiquidElement('кислота',
-                                           'images/poison_frame.png',
-                                           [0, 0], 30, 15, 350, self.space)
-            elif name == 'кирпичи':
-                new_object = SolidElement('кирпичи', 'images/bricks_frame.png',
-                                          [0, 0], 10, 10, 1000, False,
-                                          self.space)
-            elif name == 'бетон':
-                new_object = SolidElement('бетон', 'images/concrete_frame.png',
-                                          [0, 0], 25, 7, 1000, False,
-                                          self.space)
-            elif name == 'песок':
-                new_object = LiquidElement('песок', 'images/sand_frame.png',
-                                           [0, 0], 0, 10, 100000, self.space)
-            elif name == 'дуб':
-                new_object = WoodElement('дуб', 'images/oak_frame.png',
-                                         [0, 0], 5, 900, self.space)
-            elif name == 'стекло':
-                new_object = GlassElement('стекло', 'images/glass_frame.png',
-                                          [0, 0], 5, 550, self.space)
-            elif name == 'камень':
-                new_object = SolidElement('камень', 'images/stone_frame.png',
-                                          [0, 0], 15, 5, 1000, False,
-                                          self.space)
-            elif name == 'пар':
-                new_object = SteamElement(
-                    'пар', 'images/пар.png',
-                    (mouse_pos[0] + dx, mouse_pos[1] + dy))
+            new_object = self.create_object(name, mouse_pos, dx, dy)
             new_object.change_position((mouse_pos[0] + dx, mouse_pos[1] + dy))
             self.elements_group.add(new_object)
         self.is_load_mode = False
@@ -260,55 +276,8 @@ class Game:
     def load_game(self, data):
         self.clear_screen()
         for coords, name in data:
-            new_object = None
-            if name == 'вода':
-                new_object = LiquidElement('вода', 'images/water_frame.png',
-                                           [0, 0], 0, 10, 100, self.space)
-            elif name == 'огонь':
-                new_object = FireElement(
-                    'огонь', 'images/fire_frame.png', [0, 0], 1000)
-            elif name == 'металл':
-                new_object = SolidElement('металл', 'images/metal_frame.png',
-                                          [0, 0], 10, 5, 500, True, self.space)
-            elif name == 'C-4':
-                new_object = ExplodingElement('C-4', 'images/C4_frame.png',
-                                              [0, 0], 15, self.space)
-            elif name == 'металл+':
-                new_object = SolidElement('металл+',
-                                          'images/metal_plus_frame.png',
-                                          [0, 0], 50, 5, 1250, True,
-                                          self.space)
-            elif name == 'лава':
-                new_object = LavaElement('лава', 'images/lava_frame.png',
-                                         [0, 0], 1200, self.space)
-            elif name == 'кислота':
-                new_object = LiquidElement('кислота',
-                                           'images/poison_frame.png',
-                                           [0, 0], 30, 15, 350, self.space)
-            elif name == 'кирпичи':
-                new_object = SolidElement('кирпичи', 'images/bricks_frame.png',
-                                          [0, 0], 10, 10, 1000, False,
-                                          self.space)
-            elif name == 'бетон':
-                new_object = SolidElement('бетон', 'images/concrete_frame.png',
-                                          [0, 0], 25, 7, 1000, False,
-                                          self.space)
-            elif name == 'песок':
-                new_object = LiquidElement('песок', 'images/sand_frame.png',
-                                           [0, 0], 0, 10, 100000, self.space)
-            elif name == 'дуб':
-                new_object = WoodElement('дуб', 'images/oak_frame.png',
-                                         [0, 0], 5, 900, self.space)
-            elif name == 'стекло':
-                new_object = GlassElement('стекло', 'images/glass_frame.png',
-                                          [0, 0], 5, 550, self.space)
-            elif name == 'камень':
-                new_object = SolidElement('камень', 'images/stone_frame.png',
-                                          [0, 0], 15, 5, 1000, False,
-                                          self.space)
-            elif name == 'пар':
-                new_object = SteamElement(
-                    'пар', 'images/пар.png', coords)
+            mouse_pos = pygame.mouse.get_pos()
+            new_object = self.create_object(name, mouse_pos, 0, 0)
             new_object.change_position(coords)
             self.elements_group.add(new_object)
 
@@ -355,14 +324,6 @@ class Game:
                                        mouse_pos[1] + 17, 8):
                             self.erase_element((x, y))
 
-        elif mouse_event[2]:
-            self.selected_element = None
-            self.menu.unselect_button()
-            self.eraser_menu.is_open = False
-            self.select_area_menu.unselect_button()
-            self.is_save_mode = False
-            pygame.mouse.set_visible(True)
-
     def mouse_button_down(self, event, mouse_pos):
         if self.is_save_mode and event.button == 1:
             if self.table_rect.collidepoint(mouse_pos):
@@ -386,6 +347,7 @@ class Game:
             self.eraser_menu.is_open = True
             self.select_area_menu.unselect_button()
             self.is_save_mode = False
+            self.is_load_mode = False
             pygame.mouse.set_visible(True)
 
     def keydown(self, event):
@@ -420,6 +382,7 @@ class Game:
                     self.eraser_menu.is_open = False
                     self.select_area_menu.unselect_button()
                     self.is_save_mode = False
+                    self.is_load_mode = False
                     pygame.mouse.set_visible(True)
 
             elif event.type == LOAD_AREA:
@@ -430,9 +393,19 @@ class Game:
             elif event.type == SAVE_AREA:
                 self.select_area()
                 self.selected_element = None
+                self.is_load_mode = False
                 self.menu.unselect_button()
 
-            elif (mouse_event[0] or mouse_event[2]) and \
+            elif mouse_event[2]:
+                self.selected_element = None
+                self.menu.unselect_button()
+                self.eraser_menu.is_open = False
+                self.select_area_menu.unselect_button()
+                self.is_save_mode = False
+                self.is_load_mode = False
+                pygame.mouse.set_visible(True)
+
+            elif mouse_event[0] and \
                     self.selected_element and \
                     self.table_rect.collidepoint(mouse_pos):
                 self.table_clicks(mouse_event, mouse_pos)
