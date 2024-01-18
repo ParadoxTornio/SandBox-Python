@@ -201,6 +201,9 @@ class Game:
             new_object = None
             dx = coords[0] - center_pos[0]
             dy = coords[1] - center_pos[1]
+            if not self.table_rect.collidepoint(
+                    (mouse_pos[0] + dx, mouse_pos[1] + dy)):
+                continue
             if name == 'вода':
                 new_object = LiquidElement('вода', 'images/water_frame.png',
                                            [0, 0], 0, 10, 100, self.space)
@@ -422,6 +425,7 @@ class Game:
             elif event.type == LOAD_AREA:
                 self.menu.unselect_button()
                 self.select_area_menu.unselect_button()
+                self.selected_element = None
                 self.load_area()
             elif event.type == SAVE_AREA:
                 self.select_area()
