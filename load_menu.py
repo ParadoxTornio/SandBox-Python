@@ -4,7 +4,7 @@ from os import listdir
 from sys import exit
 
 
-class LoadMenu:
+class LoadMenu:     # TODO: сделать удаление областей
     def __init__(self, screen):
         self.screen = screen
         self.surface_width = 410
