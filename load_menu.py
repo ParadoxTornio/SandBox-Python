@@ -1,10 +1,10 @@
 import pygame
 from config import FPS
-from os import listdir
+from os import listdir, remove
 from sys import exit
 
 
-class LoadMenu:     # TODO: сделать удаление областей
+class LoadMenu:
     def __init__(self, screen):
         self.screen = screen
         self.surface_width = 410
@@ -13,6 +13,9 @@ class LoadMenu:     # TODO: сделать удаление областей
         self.button_height = 282
         self.background_image = pygame.image.load('images/load_menu.png')
         self.red_diskette_image = pygame.image.load('images/diskette_red.png')
+        self.musorka_image = pygame.image.load('images/musorka.png')
+        self.selected_musorka_image = pygame.image.load(
+            'images/selected button.png')
         self.selected_button_image = pygame.image.load(
             'images/selected button for load menu.png')
         self.surfaces = []
@@ -22,7 +25,9 @@ class LoadMenu:     # TODO: сделать удаление областей
             (13, 90), (435, 90), (857, 90),
             (13, 375), (435, 375), (857, 375)]
         self.esc_rect = pygame.Rect((1205, 25), (50, 50))
+        self.musorka_rect = pygame.Rect((1130, 25), (50, 50))
         self.is_open = True
+        self.is_delete_mode = False
         self.choosen_area_number = None
         self.load_images()
         self.run()
@@ -42,14 +47,27 @@ class LoadMenu:     # TODO: сделать удаление областей
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.esc_rect.collidepoint(mouse_pos):
                     self.is_open = False
+                elif self.musorka_rect.collidepoint(mouse_pos):
+                    self.is_delete_mode = not self.is_delete_mode
                 for number, rect in self.buttons_rects:
                     if rect.collidepoint(mouse_pos):
-                        self.choosen_area_number = number
-                        self.is_open = False
+                        if not self.is_delete_mode:
+                            self.choosen_area_number = number
+                            self.is_open = False
+                        else:
+                            self.surfaces[number-1].blit(
+                                self.red_diskette_image, (180, 110))
+                            self.buttons_rects.remove((number, rect))
+                            remove(f'images/saved_screenshots/{number}.png')
+                            remove(f'saves/{number}_area.save')
 
     def draw(self):
         mouse_pos = pygame.mouse.get_pos()
         self.screen.blit(self.background_image, (0, 0))
+        self.screen.blit(self.musorka_image, self.musorka_rect.topleft)
+        if self.is_delete_mode:
+            self.screen.blit(
+                self.selected_musorka_image, self.musorka_rect.topleft)
         for number, surface in enumerate(self.surfaces):
             self.screen.blit(surface, self.buttons_cords[number])
         for number, rect in self.buttons_rects:

@@ -288,6 +288,7 @@ class WoodElement(Element):
         self.solidity = solidity
         self.space = space
         self.temperature_resistance = temperature_resistance
+        self.is_killed = False
 
     def change_position(self, pos):
         super().change_position(pos)
@@ -299,8 +300,10 @@ class WoodElement(Element):
         self.space.add(self.wood_block)
 
     def kill(self):
-        self.space.remove(self.wood_block)
-        super().kill()
+        if not self.is_killed:
+            self.space.remove(self.wood_block)
+            super().kill()
+            self.is_killed = True
 
     def __copy__(self):
         new_instance = self.__class__(self.name, self.image_path,
