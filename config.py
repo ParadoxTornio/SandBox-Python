@@ -18,6 +18,7 @@ ELEMENT_SELECTED = pygame.USEREVENT + 1
 LOAD_GAME = pygame.USEREVENT + 2
 LOAD_AREA = pygame.USEREVENT + 3
 SAVE_AREA = pygame.USEREVENT + 4
+BURN_ELEMENT = pygame.USEREVENT + 5
 
 all_elements = ['вода', 'огонь', 'металл',
                 'укреплённый металл', 'бетон',

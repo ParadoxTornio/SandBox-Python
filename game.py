@@ -9,6 +9,7 @@ from config import (
     LOAD_GAME,
     LOAD_AREA,
     SAVE_AREA,
+    BURN_ELEMENT,
     BLOCK_SIZE
 )
 from menu import Menu
@@ -21,6 +22,8 @@ from elements import FireElement, ExplodingElement, WoodElement, \
     GlassElement, LavaElement, LiquidElement, SolidElement, SteamElement
 from load_menu import LoadMenu
 
+
+# TODO: исправить выделение по сетке
 
 class Game:
     def __init__(self):
@@ -395,6 +398,15 @@ class Game:
                 self.selected_element = None
                 self.is_load_mode = False
                 self.menu.unselect_button()
+
+            if event.type == BURN_ELEMENT:
+                for element in self.elements_group:
+                    if isinstance(element, WoodElement):
+                        if element.rect.collidepoint(event.message):
+                            new_fire = FireElement(
+                                'огонь', 'images/fire_frame.png', [0, 0], 1000)
+                            new_fire.change_position(event.message)
+                            self.elements_group.add(new_fire)
 
             elif mouse_event[2]:
                 self.selected_element = None

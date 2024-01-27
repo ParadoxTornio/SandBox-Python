@@ -1,4 +1,4 @@
-from config import BLOCK_SIZE
+from config import BLOCK_SIZE, BURN_ELEMENT
 # WIDTH, HEIGHT, FPS, BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
 import pygame
 from pymunk import Body, Circle, Segment
@@ -288,10 +288,13 @@ class WoodElement(Element):
         self.solidity = solidity
         self.space = space
         self.temperature_resistance = temperature_resistance
+        self.time_on_screen = None
         self.is_killed = False
+        self.is_burning = False
 
     def change_position(self, pos):
         super().change_position(pos)
+        self.pos = pos
         self.wood_block = Segment(
             self.space.static_body,
             (pos[0] + BLOCK_SIZE // 2, pos[1] + BLOCK_SIZE // 2 - 1),
@@ -311,13 +314,36 @@ class WoodElement(Element):
                                       self.temperature_resistance, self.space)
         return new_instance
 
+    def update(self):
+        if self.is_burning:
+            if not self.time_on_screen:
+                self.time_on_screen = time.perf_counter()
+            elif time.perf_counter() - self.time_on_screen >= 0.9:
+                self.burn_around()
+                pygame.sprite.Sprite.kill(self)
+
+    def burn_around(self):
+        pygame.event.post(
+            pygame.event.Event(
+                BURN_ELEMENT, message=(self.pos[0], self.pos[1] - 8)))
+        pygame.event.post(
+            pygame.event.Event(
+                BURN_ELEMENT, message=(self.pos[0], self.pos[1] + 8)))
+        pygame.event.post(
+            pygame.event.Event(
+                BURN_ELEMENT, message=(self.pos[0] - 8, self.pos[1])))
+        pygame.event.post(
+            pygame.event.Event(
+                BURN_ELEMENT, message=(self.pos[0] + 8, self.pos[1])))
+
     def interaction(self, sprite_2):
         if self.groups() == sprite_2.groups() and \
                 self.name == sprite_2.name:
             sprite_2.kill()
         if isinstance(sprite_2, FireElement):
             if self.temperature_resistance < sprite_2.temperature:
-                self.kill()
+                if not self.is_burning:
+                    self.is_burning = True
         elif isinstance(sprite_2, LiquidElement):
             if self.solidity < sprite_2.ph:
                 self.kill()
