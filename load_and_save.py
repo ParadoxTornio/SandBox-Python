@@ -9,12 +9,13 @@ class SaveAllButton(Button):
     def __init__(self, image_path, position, text, element_object=None):
         super().__init__(image_path, position, text, element_object)
         self.start_time = 0
-        self.selected_picture = pygame.image.load('images/diskette_save.png')
+        self.selected_picture = pygame.image.load('images/diskette_save_2.png')
         self.image = pygame.Surface((50, 50))
         self.image.blit(self.picture, (0, 0))
         self.is_pressed = False
 
     def click_action(self, list_of_sprites):
+        print(0)
         with open('saves/game.save', 'wb') as file:
             data = []
 
@@ -27,7 +28,7 @@ class SaveAllButton(Button):
         if self.is_pressed:
             if pygame.time.get_ticks() - self.start_time >= 2000:
                 self.image.blit(self.picture, (0, 0))
-                self.is_presed = False
+                self.is_pressed = False
         else:
             mouse_pos = pygame.mouse.get_pos()
             if event.type == pygame.MOUSEBUTTONDOWN:

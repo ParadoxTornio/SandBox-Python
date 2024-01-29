@@ -19,11 +19,10 @@ from load_and_save import LoadAllButton, SaveAllButton
 from pymunk import Space, pygame_util, Segment
 from utils import custom_collision
 from elements import FireElement, ExplodingElement, WoodElement, \
-    GlassElement, LavaElement, LiquidElement, SolidElement, SteamElement
+    GlassElement, LavaElement, LiquidElement, \
+    SolidElement, SteamElement, SandElement
 from load_menu import LoadMenu
 
-
-# TODO: исправить выделение по сетке
 
 class Game:
     def __init__(self):
@@ -79,6 +78,7 @@ class Game:
             self.space.static_body, (WIDTH + 10, 0), (WIDTH + 10, HEIGHT), 10)
 
         self.segment_floor.friction = 0.9
+        self.segment_floor.elasticity = 0.1
 
         self.space.add(self.segment_floor)
         self.space.add(self.segment_left_wall)
@@ -175,8 +175,8 @@ class Game:
                                       [0, 0], 25, 7, 1000, False,
                                       self.space)
         elif name == 'песок':
-            new_object = LiquidElement('песок', 'images/sand_frame.png',
-                                       [0, 0], 0, 10, 100000, self.space)
+            new_object = SandElement(
+                'песок', 'images/sand_frame.png', [0, 0], 0, 10, self.space)
         elif name == 'дуб':
             new_object = WoodElement('дуб', 'images/oak_frame.png',
                                      [0, 0], 5, 900, self.space)
@@ -367,8 +367,6 @@ class Game:
                 self.save_area('5')
             elif event.key == pygame.K_6:
                 self.save_area('6')
-            elif event.key == pygame.K_0:
-                self.save_area('0')
 
     def events(self):
         self.check_sprites_collisions()

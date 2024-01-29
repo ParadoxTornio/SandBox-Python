@@ -1,7 +1,7 @@
 from config import BLOCK_SIZE, BURN_ELEMENT
 # WIDTH, HEIGHT, FPS, BLACK, WHITE, BLUE, YELLOW, RED, GREEN, TITLE
 import pygame
-from pymunk import Body, Circle, Segment
+from pymunk import Body, Circle, Segment, Poly
 # import random
 import time
 
@@ -154,11 +154,6 @@ class LiquidElement(Element):
         water_body.position = pos
         self.water_shape = Circle(water_body, 5, (0, 0))
         self.water_shape.friction = 0
-        # TODO переделать песок
-        if name == 'песок':
-            self.water_shape.friction = 0.9
-            self.water_shape.body.moment = 100000
-            self.water_shape.body.mass = 10000
         space.add(water_body, self.water_shape)
 
     def update(self):
@@ -178,6 +173,43 @@ class LiquidElement(Element):
 
     def kill(self):
         self.space.remove(self.water_shape)
+        super().kill()
+
+    def interaction(self, sprite_2):
+        pass
+
+
+class SandElement(Element):
+    def __init__(self, name, image_path, pos, space):
+        super().__init__(name, image_path, pos)
+        self.image = pygame.Surface((16, 16))
+        self.image.blit(self.picture, (0, 0))
+        self.rect = self.image.get_rect()
+        self.space = space
+        self.body = Body(200, 1000)
+        self.shape = Poly.create_box(self.body, (12, 12))
+        self.shape.friction = 0.9
+        self.shape.elasticity = 0.05
+        self.space.add(self.body, self.shape)
+        self.rect.x = self.pos[0]
+        self.rect.y = self.pos[1]
+
+    def update(self):
+        self.rect.x = self.shape.body.position[0] - 8
+        self.rect.y = self.shape.body.position[1] - 8
+
+    def change_position(self, pos):
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.shape.body.position = pos[0] + 8, pos[1] + 8
+
+    def __copy__(self):
+        new_instance = self.__class__(
+            self.name, self.image_path, self.pos, self.space)
+        return new_instance
+
+    def kill(self):
+        self.space.remove(self.shape)
         super().kill()
 
     def interaction(self, sprite_2):

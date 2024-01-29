@@ -2,7 +2,7 @@ import pygame
 # from config import WIDTH, HEIGHT, FPS, BLACK,
 # WHITE, BLUE, YELLOW, RED, GREEN, TITLE
 from elements import SolidElement, LiquidElement, FireElement, \
-    ExplodingElement, WoodElement, GlassElement, LavaElement
+    ExplodingElement, WoodElement, GlassElement, LavaElement, SandElement
 from buttons import Button, MenuButton
 
 
@@ -69,8 +69,8 @@ class Menu:
                          [0, 0], 25, 7, 1000, False, self.space))
         sand_button = Button(
             'images/sand.png', (625, 525), 'песок',
-            LiquidElement('песок', 'images/sand_frame.png', [0, 0], 0, 10,
-                          100000, self.space))
+            SandElement(
+                'песок', 'images/sand_frame.png', [0, 0], self.space))
         oak_button = Button(
             'images/oak.png', (1000, 525), 'дуб',
             WoodElement('дуб', 'images/oak_frame.png',

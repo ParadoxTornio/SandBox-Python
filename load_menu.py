@@ -1,5 +1,5 @@
 import pygame
-from config import FPS
+from config import FPS, BLACK
 from os import listdir, remove
 from sys import exit
 
@@ -55,7 +55,8 @@ class LoadMenu:
                             self.choosen_area_number = number
                             self.is_open = False
                         else:
-                            self.surfaces[number-1].blit(
+                            self.surfaces[number - 1].fill(BLACK)
+                            self.surfaces[number - 1].blit(
                                 self.red_diskette_image, (180, 110))
                             self.buttons_rects.remove((number, rect))
                             remove(f'images/saved_screenshots/{number}.png')
