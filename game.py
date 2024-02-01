@@ -1,6 +1,8 @@
 import pygame
 import copy
 import pickle
+from os.path import isdir
+from os import mkdir
 from config import (
     WIDTH,
     HEIGHT,
@@ -48,6 +50,10 @@ class Game:
         self.options = pygame_util.DrawOptions(self.screen)
         self.draw_options = False
         self.clear_screen()
+        if not isdir('images/saved_screenshots'):
+            mkdir('images/saved_screenshots')
+        if not isdir('saves'):
+            mkdir('saves')
 
     def new(self):
         self.run()

@@ -292,17 +292,17 @@ class ExplodingElement(Element):
                 if not sprite_2.is_blown_up:
                     sprite_2.explode()
                     sprite_2.is_blown_up = True
+        if isinstance(sprite_2, SandElement):
+            if self.is_blown_up:
+                sprite_2.kill()
         if isinstance(sprite_2, SolidElement):
             if self.explosion_power >= sprite_2.solidity:
                 sprite_2.kill()
-                self.kill()
         if isinstance(sprite_2, WoodElement):
             if self.explosion_power > sprite_2.solidity:
-                self.kill()
                 sprite_2.kill()
         if isinstance(sprite_2, GlassElement):
             if self.explosion_power >= sprite_2.solidity:
-                self.kill()
                 sprite_2.kill()
         if isinstance(sprite_2, LiquidElement):
             if sprite_2.ph > 0:
@@ -310,7 +310,6 @@ class ExplodingElement(Element):
                     self.groups()[0].add(SteamElement('пар', 'images/пар.png', [self.rect.x, self.rect.y]))  # noqa
                 except IndexError or AssertionError:
                     pass
-                self.kill()
 
 
 class WoodElement(Element):
@@ -352,7 +351,7 @@ class WoodElement(Element):
                 self.time_on_screen = time.perf_counter()
             elif time.perf_counter() - self.time_on_screen >= 0.9:
                 self.burn_around()
-                pygame.sprite.Sprite.kill(self)
+                self.kill()
 
     def burn_around(self):
         pygame.event.post(
